@@ -297,7 +297,7 @@ Sau khi nhúng, mô hình biểu diễn của ảnh đã mã hóa trở thành $
 ## Kết quả thảo luận
 
 <p align="center">
-  <img src="Images/Time.jpg" width="800">
+  <img src="Images/Time.jpg" width="500">
   <br>
   <i> Biểu đồ so sánh các thời gian các bước giữa MEA và MEA-GQA</i>
 </p>
@@ -314,18 +314,18 @@ Bảng đánh giá chất lượng mã hóa văn bản
 | Bit diffusion (%) | 40.01 | Hiệu ứng avalanche tốt, gần mức lý tưởng. |
 
 <p align="center">
-  <img src="Images/histogramMEAtc.png" width="800">
+  <img src="Images/histogramMEAtc.png" width="700">
   <br>
   <i> So sánh histogram màu ảnh trước và sau khi giấu tin</i>
 </p>
 
 Bảng đánh giá chất lượng ảnh giữa ảnh gốc và ảnh sau khi giấu tin
 
-| Chỉ số | Giá trị |
-| :--- | :--- |
-| MSE | 1.743 |
-| PSNR (dB) | 45.57 |
-| SSIM | 0.998 |
-| Entropy (bits) | 7.666 |
-| Correlation | H = 0.892<br>V = 0.850<br>D = 0.792 |
+| Chỉ số | Giá trị | Nhận xét |
+| :--- | :--- | :--- |
+| MSE | 1.743 | Sai số bình phương trung bình rất thấp, độ biến dạng ảnh không đáng kể. |
+| PSNR (dB) | 45.57 | Chất lượng ảnh sau khi giấu tin cực kỳ cao (> 40 dB), mắt thường không thể phát hiện. |
+| SSIM | 0.998 | Đạt độ tương đồng cấu trúc tiệm cận tuyệt đối (gần bằng 1) so với ảnh gốc. |
+| Entropy (bits) | 7.666 | Độ ngẫu nhiên của thông tin cao, tiệm cận mức lý tưởng 8 bits của ảnh xám/màu. |
+| Correlation | H = 0.892<br>V = 0.850<br>D = 0.792 | Độ tương quan giữa các pixel liền kề theo các phương (Ngang, Dọc, Chéo) giảm nhẹ nhưng vẫn duy trì tự nhiên. |
 
