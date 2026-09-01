@@ -92,3 +92,16 @@ MEA_GQA.Decoding_MEAGQA(output_stego_folder)
 > **`output_stego_folder`**: The path to the folder containing the destination image files with hidden information.
 
 
+<h3 align="left">
+  <span style="color:#8B4513;">
+    <b>Theoretical framework of the proposed study</b>
+  </span>
+</h3>
+
+<h2 align="center">
+  <span style="color:#8B4513;">
+    <b>Mô hình mã hóa mô - đun dữ liệu trên đường truyền cải tiến (MEA-GQA)</b>
+  </span>
+</h2>
+
+
