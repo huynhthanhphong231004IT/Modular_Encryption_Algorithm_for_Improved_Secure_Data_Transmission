@@ -236,4 +236,37 @@ Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệ
 - Bước 6: Chọn các hạng tử có hệ số lẻ và chia modulo 11B: Từ đa thức kết quả $P(x)$, chỉ giữ lại các hạng tử có hệ số lẻ (bỏ các hệ số chẵn và bỏ hệ số, chỉ giữ phần lũy thừa của $x$). Ví dụ nếu biểu thức thu được là $x^{12} + x^{11} + x^{10} + x^9 + 2x^8 + 2x^7 + 2x^6 + 2x^5 + 2x^4 + 2x^3 + x^2 + x$, thì biểu thức với các hệ số lẻ là $x^{12} + x^{11} + x^{10} + x^9 + x^2 + x$. Biểu thức tương tự khi bỏ qua hệ số (đưa về hệ số 1) là $x^{12} + x^{10} + x^9 + x^5 + x$ và tiến hành chia cho 11B, tức là $x^8 + x^4 + x^3 + x + 1$ kết quả thu được $x^5 + x^3 + x^2 + x + 1$.
 - Bước 7: Chuyển đổi biểu thức đa thức kết quả sang dạng nhị phân và hexadecimal. Ví dụ $x^5 + x^3 + x^2 + x + 1$ tương đương $00101111$ tương đương 2F.
 
+<h3 align="left">
+  <span style="color:#8B4513;">
+    <b>4. Hoán vị phi tuyến bậc hai sau quá trình mã hóa</b>
+  </span>
+</h3>
+
+Sau bước trộn dữ liệu qua các pha XOR tồn tại $\mathcal{N}$ ma trận $3 \times 3$: $A_n^{(12)}$ với $n \in [1, 2, \dots, \mathcal{N}]$. Nếu $\mathcal{N}$ là số lẻ thì thêm $A_{\mathcal{N}+1}$ vào cuối, ngược lại giữ nguyên.
+
+Làm phẳng và ghép tuần tự các ma trận lại với nhau: $$\mathcal{W} \longrightarrow \text{vec}(A_n^{(12)})^T \longrightarrow [a_{00}^1, a_{01}^1, a_{02}^1 \dots a_{22}^1, a_{00}^2, a_{01}^2, a_{02}^2 \dots a_{22}^2 \dots a_{00}^{\mathcal{N}}, a_{01}^{\mathcal{N}}, a_{02}^{\mathcal{N}} \dots a_{22}^{\mathcal{N}}, \dots]$$. Với mỗi giá trị $a_x^y$ là tổ hợp 2 giá trị hex được tách thành tập 2 giá trị hex riêng biệt $(h_{\text{left}}, h_{\text{right}})$ tiến hành tính toán:
+
+$$\begin{aligned}
+\text{Khối 1: } & (x_1, x_2, x_3, x_4) = (\underbrace{h_1, h_2}_{a_{00}^1}, \underbrace{h_3, h_4}_{a_{01}^1}) \longrightarrow y_1 \longrightarrow A_1^{(13)} = \text{Binary}(y_1) \\
+\text{Khối 2: } & (x_1, x_2, x_3, x_4) = (\underbrace{h_5, h_6}_{a_{02}^1}, \underbrace{h_7, h_8}_{a_{03}^1}) \longrightarrow y_2 \longrightarrow A_2^{(13)} = \text{Binary}(y_2) \\
+\text{Khối 3: } & (x_1, x_2, x_3, x_4) = (\underbrace{h_9, h_{10}}_{a_{10}^1}, \underbrace{h_{11}, h_{12}}_{a_{11}^1}) \longrightarrow y_3 \longrightarrow A_3^{(13)} = \text{Binary}(y_3) \\
+\text{Khối 4: } & (x_1, x_2, x_3, x_4) = (\underbrace{h_{13}, h_{14}}_{a_{12}^1}, \underbrace{h_{15}, h_{16}}_{a_{20}^1}) \longrightarrow y_4 \longrightarrow A_4^{(13)} = \text{Binary}(y_4) \\
+& \dots \\
+\text{Khối n: } & (x_1, x_2, x_3, x_4) = (\underbrace{h_{13}, h_{14}}_{a_{21}^n}, \underbrace{h_{15}, h_{16}}_{a_{22}^n}) \longrightarrow y_n \longrightarrow A_n^{(13)} = \text{Binary}(y_n)
+\end{aligned}$$
+
+Ghép tuần tự các giá trị nhị phân ta được chuỗi nhị phân mã hóa Text với hàm hoán vị phi tuyến bậc 2 được định nghĩa bên dưới: $$A^{(13)} = A_1^{(13)} A_2^{(13)} A_3^{(13)} \dots A_n^{(13)}$$. Hàm mã hóa thành phần: Xét bài toán mã hóa một bộ dữ liệu gồm bốn thành phần $(x_1, x_2, x_3, x_4)$ thành một số nguyên duy nhất $y$. Giả sử miền giá trị của các phần tử dữ liệu đầu vào được giới hạn bởi $x_i \in \mathbb{Z}$ và $0 \le x_i \le 15$ với mọi $i \in \{1, 2, 3, 4\}$. Chọn một hằng số nguyên dương $P \in \mathbb{Z}^+$. Hàm mã hóa thành phần $g(x) : \mathbb{Z}^+ \to \mathbb{Z}^+$ được định nghĩa như sau: $$g(x) = x + P x^2$$. Để đảm bảo khả năng đảo ngược cấu trúc mã hóa mà không xảy ra hiện tượng chồng lấn giá trị (aliasing), ta chọn cơ số mã hóa $B \in \mathbb{Z}^+$ thỏa mãn điều kiện nghiêm ngặt: $B > \max_{0 \le x \le 15} g(x) = 15 + 225P$. Khi đó, giá trị mã hóa tổng hợp $y : (\mathbb{Z}^+)^4 \to \mathbb{Z}^+$ của bộ dữ liệu theo hệ cơ số $B$ được xác định thông qua tổ hợp tuyến tính lũy thừa $$y = g(x_1) + B \cdot g(x_2) + B^2 \cdot g(x_3) + B^3 \cdot g(x_4)$$. Triển khai tường minh bằng cách thay thế $g(x_i)$, ta thu được biểu thức đa thức đại số: $$y = (x_1 + P x_1^2) + B(x_2 + P x_2^2) + B^2(x_3 + P x_3^2) + B^3(x_4 + P x_4^2) = \sum_{i=1}^{4} x_i B^{i-1} + P \sum_{i=1}^{4} x_i^2 B^{i-1}$$
+
+Do điều kiện ràng buộc $g(x_i) < B$ với mọi $i$, các giá trị $g(x_i)$ đóng vai trò tương tự như các chữ số đại diện độc lập trong hệ cơ số $B$. Hệ quả là, ta hoàn toàn có thể bóc tách ngược một cách tuần tự các thành phần $g(x_i)$ từ bậc cao xuống bậc thấp bằng phép toán lấy phần nguyên $\lfloor \cdot \rfloor$. Giá trị $y$ sinh ra nằm trong khoảng $y \in [0, B^4 - 1]$. Vì đã chứng minh được $y < B^4$, số bit tối đa cần thiết để biểu diễn mọi giá trị của $y$ được cố định hoàn toàn theo công thức: $$k = \lceil \log_2(B^4) \rceil = \lceil 4 \log_2 B \rceil \quad (\text{bits})$$
+
+Hàm giải mã: Sau khi trích xuất được giá trị $d_i = g(x_i)$, ta thực hiện giải phương trình bậc hai đối với biến số $x_i$: $P x_i^2 + x_i - d_i = 0$. Tuy nhiên, do điều kiện biên ban đầu quy định dữ liệu đầu vào $x_i \ge 0$ và tham số $P \in \mathbb{Z}^+$, nghiệm ứng với dấu trừ ($\frac{-1-\sqrt{\Delta}}{2P}$) luôn cho giá trị âm và bị loại. Vì vậy, ta thu được công thức khôi phục nghiệm duy nhất:
+
+$$x_i = \frac{-1 + \sqrt{1 + 4 P d_i}}{2P}$$
+
+| Bước ($i$) | Giá trị trích xuất $d_i$ | Phần dư kế tiếp $r$ | Giá trị khôi phục $x_i$ |
+| :---: | :---: | :---: | :---: |
+| 1 | $d_4 = \lfloor \frac{y}{B^3} \rfloor$ | $r_3 = y - d_4 B^3$ | $x_4 = \frac{-1 + \sqrt{1 + 4 P d_4}}{2P}$ |
+| 2 | $d_3 = \lfloor \frac{r_3}{B^2} \rfloor$ | $r_2 = r_3 - d_3 B^2$ | $x_3 = \frac{-1 + \sqrt{1 + 4 P d_3}}{2P}$ |
+| 3 | $d_2 = \lfloor \frac{r_2}{B} \rfloor$ | $r_1 = r_2 - d_2 B$ | $x_2 = \frac{-1 + \sqrt{1 + 4 P d_2}}{2P}$ |
+| 4 | $d_1 = r_1$ | — | $x_1 = \frac{-1 + \sqrt{1 + 4 P d_1}}{2P}$ |
 
