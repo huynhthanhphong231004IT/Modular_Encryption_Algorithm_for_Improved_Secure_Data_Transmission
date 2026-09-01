@@ -1,1 +1,6 @@
-ReoRioll
+
+Research: Modular Encryption Algorithm for Secure Data Transmission (IJSRNSC - Author: P.Sri Ram Chandra, G. Venkateswara Rao,  G.V. Swamy)
+Update Research: Modular Encryption Algorithm for Improved Secure Data Transmission
+Computer Science Undergraduate Thesis: Modular Encryption Algorithm for Game Question Authentication
+Author MEA-GQA: Huynh Thanh Phong/ReoRioll
+College of Information and Communication Technology of Can Tho University of Course 48

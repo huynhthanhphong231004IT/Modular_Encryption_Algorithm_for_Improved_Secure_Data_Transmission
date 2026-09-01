@@ -96,34 +96,3 @@ def embed_message_from_folder(
         saved_stego_paths.append(out_path)
         print(f" -> Đã tạo ảnh Stego {i}/{N}: {out_path}")
     return saved_stego_paths
-if __name__ == "__main__":
-    CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
-    
-    # 1. Đường dẫn các thư mục và file
-    npz_file = os.path.join(CONTENT_DIR, "E_Final_Permutation.npz")
-    input_folder = os.path.join(CONTENT_DIR, "Input_Covers")
-    output_folder = os.path.join(CONTENT_DIR, "Output_Stego")
-
-    if not os.path.exists(npz_file):
-        raise FileNotFoundError(f"Không tìm thấy file dữ liệu nhị phân: {npz_file}")
-
-    # 2. Đọc chuỗi nhị phân cần giấu từ E_Final_Permutation.npz
-    npz_data = np.load(npz_file)
-    binary_message = str(npz_data["binary_text"])
-    
-    print(f"[+] Đã tải chuỗi nhị phân mã hóa từ: {npz_file}")
-    print(f"-> Độ dài chuỗi bit cần giấu: {len(binary_message)} bits")
-
-    # 3. Thực hiện giấu tin vào danh sách ảnh trong thư mục Input_Covers
-    try:
-        stego_paths = embed_message_from_folder(
-            message=binary_message,
-            input_dir=input_folder,
-            output_dir=output_folder
-        )
-        print("\n[THÀNH CÔNG] Đã giấu tin thành công! Các ảnh Stego lưu tại:")
-        for path in stego_paths:
-            print(f" - {path}")
-            
-    except Exception as e:
-        print(f"\n[LỖI] {e}")

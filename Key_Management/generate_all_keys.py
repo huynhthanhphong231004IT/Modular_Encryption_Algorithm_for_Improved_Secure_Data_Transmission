@@ -37,5 +37,3 @@ def generate_and_save_all_keys():
     )
     
     print(f"[SUCCESS] Đã khởi tạo và lưu thành công toàn bộ khóa vào:\n -> {ALL_KEYS_FILE}")
-
-generate_and_save_all_keys()

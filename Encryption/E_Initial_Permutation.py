@@ -38,24 +38,3 @@ def encrypt_text_to_matrices(plaintext: str) -> tuple:
     p, g, S = InitialPermutation_load_initial_permutation_key()
     cipher_blocks, pad_len = encrypt_text(plaintext, p, g, S)
     return cipher_blocks, pad_len
-
-if __name__ == "__main__":
-    p, g, S = InitialPermutation_load_initial_permutation_key()
-    
-    input_doc_file = os.path.join(PROJECT_ROOT, "Content", "sample_doc.txt")
-    with open(input_doc_file, "r", encoding="utf-8") as f:
-        text = f.read()
-    print("Văn bản gốc từ file:\n", text)
-    cipher, pad_len = encrypt_text(text, p, g, S)
-    os.makedirs(CONTENT_DIR, exist_ok=True)
-    np.savez(DATA_FILE, cipher=np.array(cipher), pad_len=pad_len)
-    txt_file = os.path.join(CONTENT_DIR, "E_Initial_Permutation.txt")
-    with open(txt_file, "w", encoding="utf-8") as f:
-        f.write(f"Padding Length: {pad_len}\nTotal Blocks: {len(cipher)}\n\n")
-        for idx, block in enumerate(cipher):
-            f.write(f"--- Block {idx + 1} ---\n")
-            np.savetxt(f, block, fmt="%d")
-            f.write("\n")
-    
-    print(f"\n[+] Đã mã hóa thành công {len(cipher)} khối.")
-    print(f"-> File mã hóa lưu tại: {DATA_FILE}")

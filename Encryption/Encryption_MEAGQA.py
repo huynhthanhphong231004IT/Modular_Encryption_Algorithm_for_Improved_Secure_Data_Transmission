@@ -103,7 +103,7 @@ def embed_message_from_folder(
 
     return saved_stego_paths
 
-def run_full_encryption_pipeline(input_txt_path: str, input_covers_dir: str, output_stego_dir: str):
+def Encryption_MEAGQA(input_txt_path: str, input_covers_dir: str, output_stego_dir: str):
     CONTENT_DIR = os.path.dirname(input_txt_path)
     os.makedirs(CONTENT_DIR, exist_ok=True)
     os.makedirs(output_stego_dir, exist_ok=True)
@@ -200,17 +200,3 @@ def run_full_encryption_pipeline(input_txt_path: str, input_covers_dir: str, out
 
     return output_stego_dir
 
-
-if __name__ == "__main__":
-    CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
-    input_text_file = os.path.join(CONTENT_DIR, "sample_doc.txt")
-    input_covers_folder = os.path.join(CONTENT_DIR, "Input_Covers")
-    output_stego_folder = os.path.join(CONTENT_DIR, "Output_Stego")
-    try:
-        stego_result_dir = run_full_encryption_pipeline(
-            input_txt_path=input_text_file,
-            input_covers_dir=input_covers_folder,
-            output_stego_dir=output_stego_folder
-        )
-    except Exception as e:
-        print(f"\n[LỖI THỰC THI PIPELINE] {e}")

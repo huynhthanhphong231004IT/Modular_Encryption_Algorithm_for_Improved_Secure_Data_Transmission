@@ -38,19 +38,3 @@ def decrypt_text(cipher_blocks: list, pad_len: int, p: int, g: int, S: np.ndarra
     if pad_len > 0:
         raw_bytes = raw_bytes[:-pad_len]
     return raw_bytes.decode('utf-8', errors='ignore')
-        
-if __name__ == "__main__":
-    try:
-        p, g, S = InitialPermutation_load_initial_permutation_key()
-        data = np.load(DATA_FILE)
-        cipher_blocks = list(data["cipher"])
-        pad_len = int(data["pad_len"])
-        restored_text = decrypt_text(cipher_blocks, pad_len, p, g, S)
-        print("\n[+] Kết quả giải mã thành công:\n")
-        print(restored_text)
-        output_file = os.path.join(CONTENT_DIR, "D_Initial_Permutation.txt")
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(restored_text)
-        print(f"\n[+] Đã lưu văn bản giải mã tại: {output_file}")
-    except FileNotFoundError:
-        print(f"Lỗi: Không tìm thấy file '{DATA_FILE}'. Vui lòng chạy file mã hóa trước!")

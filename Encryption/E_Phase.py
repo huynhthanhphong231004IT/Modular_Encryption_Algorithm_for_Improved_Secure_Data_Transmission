@@ -92,19 +92,10 @@ def encrypt_phase_2(A8, subkeys, sbox_table):
     return A11, A12
 
 def encrypt_phase_pipeline(A2, subkeys, log_table, exp_table, sbox_table):
-    """Hàm xử lý cho một block duy nhất."""
     A8 = encrypt_phase_1(A2, subkeys, log_table, exp_table)
     A11, A12 = encrypt_phase_2(A8, subkeys, sbox_table)
     return A8, A11, A12
-
-# =========================================================================
-# BỔ SUNG HÀM NÀY ĐỂ TƯƠNG THÍCH HOÀN TOÀN VỚI FILE NGUỒN (MAIN PIPELINE)
-# =========================================================================
 def encrypt_phase_from_matrices(init_matrices):
-    """
-    Hàm interface nhận vào danh sách các ma trận (từ E_Initial_Permutation)
-    và thực hiện mã hóa Phase cho toàn bộ chuỗi.
-    """
     try:
         keys_dict = load_keys()
         mea_matrices = keys_dict.get("mea_matrices", [])
@@ -125,50 +116,3 @@ def encrypt_phase_from_matrices(init_matrices):
         phase2_matrices.append(A11)
         
     return phase2_matrices
-
-
-if __name__ == "__main__":
-    content_dir = os.path.join(PROJECT_ROOT, "Content")
-    input_file = os.path.join(content_dir, "E_Initial_Permutation.npz")
-    output_npz = os.path.join(content_dir, "E_Phase.npz")
-
-    if not os.path.exists(input_file):
-        print(f"[!] Không tìm thấy file đầu vào: {input_file}")
-        sys.exit(1)
-
-    data = np.load(input_file, allow_pickle=True)
-    raw_blocks = data['cipher']
-    pad_len = int(data['pad_len']) if 'pad_len' in data.files else 0
-    mea_cipher_blocks = [parse_to_int_array(b) for b in raw_blocks]
-
-    try:
-        keys_dict = load_keys()
-        mea_matrices = keys_dict.get("mea_matrices", [])
-        subkeys = {
-            idx + 1: parse_to_int_array(mat) 
-            for idx, mat in enumerate(mea_matrices)
-        } if isinstance(mea_matrices, (list, np.ndarray)) else keys_dict.get("mea_matrices", {})
-    except Exception:
-        subkeys = {k: np.full((3, 3), k, dtype=np.int64) for k in range(1, 37)}
-
-    log_table, exp_table = generate_log_exp_tables()
-    sbox_table = get_sbox()
-
-    phase_1_outputs, phase_2_raw, phase_2_hex = zip(*[
-        encrypt_phase_pipeline(block, subkeys, log_table, exp_table, sbox_table) 
-        for block in mea_cipher_blocks
-    ])
-
-    os.makedirs(content_dir, exist_ok=True)
-    np.savez(
-        output_npz,
-        cipher=mea_cipher_blocks,
-        pad_len=pad_len,
-        phase1_cipher=np.array(phase_1_outputs, dtype=object),
-        phase2_cipher=np.array(phase_2_raw, dtype=object),
-        phase2_hex=np.array(phase_2_hex, dtype=object)
-    )
-
-    print("\n" + "=" * 60)
-    print("MÃ HÓA PHASE HOÀN TẤT (E_Phase.py)")
-    print("=" * 60)

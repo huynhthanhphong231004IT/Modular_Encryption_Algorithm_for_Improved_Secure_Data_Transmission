@@ -1,8 +1,0 @@
-Padding Length: 1
-Total Blocks: 1
-
---- Block 1 ---
-531 203 246
-85 321 297
-509 333 83
-

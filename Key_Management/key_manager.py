@@ -17,26 +17,17 @@ def load_keys():
         )
     data = np.load(ALL_KEYS_FILE)
     keys_dict = {
-
-        # A DES key
         "des_bytes": bytes(data["des_bytes"]),
         "des_int": int(data["des_int"]),
         "des_bits": str(data["des_bits"]),
-
-        # Final Permutation keys
         "P": int(data["P"]),
         "B": int(data["B"]),
-
-        # Initial Permutation keys
         "p": int(data["p"]),
         "g": int(data["g"]),
         "S": data["S"],
-
-        # MEA keys
         "mea_n_params": data["mea_n_params"].tolist(),
         "mea_matrices": data["mea_matrices"]
     }
-    
     return keys_dict
 
 def InitialPermutation_load_initial_permutation_key():

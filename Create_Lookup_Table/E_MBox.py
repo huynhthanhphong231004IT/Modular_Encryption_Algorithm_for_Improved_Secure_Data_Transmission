@@ -41,29 +41,24 @@ def gf_mul_gf2(a: int, b: int) -> int:
         a <<= 1
         b >>= 1
     return p
-
 def build_mbox_lut(key_K_ij: int) -> dict:
-    mbox_lut = {}
-    print(f"[+] [E_MBox] Đang sinh LUT 16-bit với Khóa K_ij = {hex(key_K_ij)}...")
-    
-    for val in range(0x10000): 
-        hex_in = f"{val:04X}"
-        A1 = (val >> 8) & 0xFF
-        B1 = val & 0xFF
-        
-        A2 = gf_mul(A1, key_K_ij)
-        B2 = gf_mul(B1, key_K_ij)
-        
-        # ĐÃ SỬA: Dịch trái (A2 << 1) ở cả 2 nhánh để đảm bảo song ánh 1-1
-        A3 = ((A2 << 1) ^ G_POLY) & 0xFF if (A2 & 0x80) else (A2 << 1)
-        B3 = ((B2 << 1) ^ G_POLY) & 0xFF if (B2 & 0x80) else (B2 << 1)
-        
-        rem_A = poly_div_mod_gf2(gf_mul_gf2(A3, key_K_ij), G_POLY) if A3 != 0 else 0
-        rem_B = poly_div_mod_gf2(gf_mul_gf2(B3, key_K_ij), G_POLY) if B3 != 0 else 0
-        
-        remainder_16bit = (rem_A << 8) | rem_B
-        mbox_lut[hex_in] = f"{remainder_16bit:04X}"
-        
+    print(f"[+] [E_MBox] Đang sinh LUT 16-bit với Khóa K_ij = {hex(key_K_ij)}")
+    vals = np.arange(0x10000, dtype=np.uint16)
+    A1 = (vals >> 8) & 0xFF
+    B1 = vals & 0xFF
+    gf_mul_lut = np.array([gf_mul(x, key_K_ij) for x in range(256)], dtype=np.uint8)
+    A2 = gf_mul_lut[A1]
+    B2 = gf_mul_lut[B1]
+    A3 = np.where((A2 & 0x80) != 0, ((A2.astype(np.uint16) << 1) ^ G_POLY) & 0xFF, (A2 << 1))
+    B3 = np.where((B2 & 0x80) != 0, ((B2.astype(np.uint16) << 1) ^ G_POLY) & 0xFF, (B2 << 1))
+    rem_lut = np.array([
+        poly_div_mod_gf2(gf_mul_gf2(x, key_K_ij), G_POLY) if x != 0 else 0 
+        for x in range(256)
+    ], dtype=np.uint16)
+    rem_A = rem_lut[A3]
+    rem_B = rem_lut[B3]
+    remainder_16bit = (rem_A << 8) | rem_B
+    mbox_lut = {f"{i:04X}": f"{v:04X}" for i, v in enumerate(remainder_16bit)}
     return mbox_lut
 
 def encrypt_from_npz(filename="encrypted_data.npz"):
@@ -114,10 +109,7 @@ def encrypt_from_npz(filename="encrypted_data.npz"):
     return plaintext, cipher_list, K_16
 
 def build_inverse_table(forward_lut: dict) -> dict:
-    inv_table = {}
-    for x_hex, y_hex in forward_lut.items():
-        inv_table[y_hex] = int(x_hex, 16)
-    return inv_table
+    return {y_hex: int(x_hex, 16) for x_hex, y_hex in forward_lut.items()}
 
 def decrypt_from_npz(filename="encrypted_data.npz") -> tuple:
     content_dir = os.path.join(PROJECT_ROOT, "Content")

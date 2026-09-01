@@ -1,4 +1,3 @@
-
 def gf_mul(a: int, b: int) -> int:
     p = 0
     for _ in range(8):
