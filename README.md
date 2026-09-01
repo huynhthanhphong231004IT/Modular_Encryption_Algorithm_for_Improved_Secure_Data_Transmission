@@ -193,7 +193,7 @@ a_{20} & a_{21} & a_{22}
   </span>
 </h3>
 
-### Quy trình xử lý các Pha mã hóa
+## Quy trình xử lý các Pha mã hóa
 
 **Pha I: Lặp 16 lần thực hiện với trường khóa S từ 4 đến 35**
 
@@ -218,4 +218,35 @@ Lặp tuần tự j = 1 đến 3 thực hiện các bước sau:
 | 1 | Phép XOR với khóa tam thức | $A^{(9)} = A^{(8)} \oplus K_j$ |
 | 2 | Hoán vị hàng (Row Interchange) | $R_m \leftarrow R_{(m+1) \bmod 3}, \quad 0 \le m \le 2$<br>*(Hàng m được thay thế bằng hàng kế tiếp theo chu kỳ $\bmod 3$)* |
 | 3 | Phép thay thế byte (Sub-Bytes) | $A^{(11)} = \text{S-Box}(A^{(10)})$ |
-| **KẾT QUẢ** | Chuyển đổi sang giá trị thập lục phân | $A^{(12)} = \text{Hexadecimal}(A^{(11)})$ |
+
+**Chuyển đổi sang giá trị thập lục phân:** $A^{(12)} = \text{Hexadecimal}(A^{(11)})$.
+
+## Giải thuật sinh bảng tra M-Box
+
+Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệt tiêu hoàn toàn hàm ngược toán học trực tiếp. Điều này khiến việc khôi phục lại dữ liệu gốc từ đầu ra là không thể thực hiện về mặt tính toán, vô hiệu hóa hoàn toàn các đòn tấn công giải mã ngược ngay cả khi kẻ tấn công sở hữu siêu máy tính.
+
+- Đầu vào (Input): Một khối gồm 4 chữ số Hexadecimal.
+- Đầu ra (Output): Một khối gồm 2 chữ số Hexadecimal.
+
+- Bước 1: Biểu diễn dưới dạng nhị phân (ví dụ: 2ACF): Mỗi chữ số Hexadecimal được biểu diễn bằng 4 bit nhị phân. (Ví dụ: F = 1111)
+- Bước 2: Chia dãy bit thành hai phần và biểu diễn dưới dạng đa thức: Chia dãy 16 bit thành 2 phần bằng nhau, mỗi phần gồm 8 bits. Quy định 8 bits trái (left) là $A^{(1)}$, 8 bits phải (right) là $B^{(1)}$. (Ví dụ: 2ACF được tách ra $A^{(1)} = \text{2A} = 00101010$, $B^{(1)} = \text{CF} = 11001111$)
+- Bước 3: Tra cứu khóa từ ma trận $S_{3 \times 3}$ và thực hiện phép toán với dữ liệu:
+
+Giá trị khóa 8 bits $K_{i,j}$ được tra cứu từ ma trận khóa $S_{3 \times 3}$ với chỉ số hàng $i = p \bmod 3$ và chỉ số cột $j = g \bmod 3$:
+
+$$K_{i,j} = S[p \bmod 3, g \bmod 3]$$
+
+Sau đó, các khối dữ liệu $A^{(1)}$ và $B^{(1)}$ thực hiện phép nhân trường Galois với khóa tương ứng:
+
+$$A^{(2)}(x) = \left( A^{(1)}(x) \cdot K_i(x) \right) \bmod G(x)$$
+
+$$B^{(2)}(x) = \left( B^{(1)}(x) \cdot K_j(x) \right) \bmod G(x)$$
+
+với $G(x) = x^8 + x^4 + x^3 + x + 1$ (tương ứng mã 0x11B).
+
+- Bước 4: Kiểm tra bit thứ 7 của kết quả và dịch bit có điều kiện: Kiểm tra bit thứ 7 (giá trị 0x80) của dữ liệu. Nếu bit thứ 7 là 1 ($A^{(2)} \text{ AND } \text{0x80} \neq 0$), thực hiện dịch trái 1 bit và khử tràn bằng phép XOR với đa thức 0x11B: $$A^{(3)} = (A^{(2)} \ll 1) \oplus \text{0x11B}$$ (tương tự cho $B^{(3)} = (B^{(2)} \ll 1) \oplus \text{0x11B}$). Ngược lại, nếu bit thứ 7 là 0, giữ nguyên giá trị $A^{(3)} = A^{(2)}$ và $B^{(3)} = B^{(2)}$.
+- Bước 5: Nhân hai đa thức: Thực hiện phép nhân hai đa thức vừa thu được bằng phép nhân đa thức thông thường (không rút gọn theo modulo ở bước này), do đó kết quả là một đa thức bậc cao (thường lớn hơn 8): $$P(x) = A^{(3)} \times B^{(3)}$$
+- Bước 6: Chọn các hạng tử có hệ số lẻ và chia modulo 11B: Từ đa thức kết quả $P(x)$, chỉ giữ lại các hạng tử có hệ số lẻ (bỏ các hệ số chẵn và bỏ hệ số, chỉ giữ phần lũy thừa của $x$). Ví dụ nếu biểu thức thu được là $x^{12} + x^{11} + x^{10} + x^9 + 2x^8 + 2x^7 + 2x^6 + 2x^5 + 2x^4 + 2x^3 + x^2 + x$, thì biểu thức với các hệ số lẻ là $x^{12} + x^{11} + x^{10} + x^9 + x^2 + x$. Biểu thức tương tự khi bỏ qua hệ số (đưa về hệ số 1) là $x^{12} + x^{10} + x^9 + x^5 + x$ và tiến hành chia cho 11B, tức là $x^8 + x^4 + x^3 + x + 1$ kết quả thu được $x^5 + x^3 + x^2 + x + 1$.
+- Bước 7: Chuyển đổi biểu thức đa thức kết quả sang dạng nhị phân và hexadecimal. Ví dụ $x^5 + x^3 + x^2 + x + 1$ tương đương $00101111$ tương đương 2F.
+
+
