@@ -165,19 +165,19 @@ Giả sử $p$ là một số nguyên tố lớn ($p > 255$), $g$ là phần t�
 
 **Đầu vào (Input):** Chuỗi bản rõ (*Plaintext*) được chia thành các khối gồm 9 ký tự. Mỗi khối 9 ký tự tương ứng với $9 \times 8 = 72\text{ bit}$ dữ liệu.
 
-$$X^{(1)} = \left[ \begin{array}{ccc} 
-x_{00} & x_{01} & x_{02} \\[8pt] 
-x_{10} & x_{11} & x_{12} \\[8pt] 
+$$X^{(1)} = \begin{bmatrix} 
+x_{00} & x_{01} & x_{02} \\ 
+x_{10} & x_{11} & x_{12} \\ 
 x_{20} & x_{21} & x_{22} 
-\end{array} \right]$$
+\end{bmatrix}$$
 
 trong đó $a_{00}$ đến $a_{22}$ là các giá trị ASCII của 9 ký tự tương ứng, được biểu diễn ở dạng Hexadecimal (cơ số 16). Nhờ cách biểu diễn này, ma trận thông điệp có thể được xây dựng trực tiếp từ các khối dữ liệu dạng hexadecimal, tạo điều kiện thuận lợi cho việc thực hiện các phép biến đổi đại số trên trường hữu hạn $\mathbb{F}_p$ trong các bước mã hóa tiếp theo.
 
-$$A^{(2)} = \text{Enc}_{GL(3, \mathbb{F}_p)}(X^{(1)}, g, S) = \left[ \begin{array}{ccc} 
-a_{00} & a_{01} & a_{02} \\[8pt] 
-a_{10} & a_{11} & a_{12} \\[8pt] 
+$$A^{(2)} = \text{Enc}_{GL(3, \mathbb{F}_p)}(X^{(1)}, g, S) = \begin{bmatrix} 
+a_{00} & a_{01} & a_{02} \\ 
+a_{10} & a_{11} & a_{12} \\ 
 a_{20} & a_{21} & a_{22} 
-\end{array} \right]$$
+\end{bmatrix}$$
 
 #### Quy trình mã hóa – giải mã của giai đoạn hoán vị đầu giải thuật MEA tăng cường
 
@@ -187,3 +187,33 @@ a_{20} & a_{21} & a_{22}
 | **2** | Tính $M = [g^{x_{ij}} \bmod p]$ | Tính $M' = S^{-1}YS$ |
 | **3** | Tính $Y = SMS^{-1}$ | Tính $X = [\log_g(M'_{ij})] \bmod (p - 1)$ |
 
+<h3 align="left">
+  <span style="color:#8B4513;">
+    <b>3. Trộn dữ liệu qua các pha XoR</b>
+  </span>
+</h3>
+
+**Pha I: Lặp 16 lần thực hiện với trường khóa S từ 4 đến 35**
+
+*Lặp tuần tự: i = 1 đến 16 thực hiện các bước sau:*
+
+I.1 - Vòng 1: với các trường khóa S chẵn** $i = 2i + 2$
+- Phép XOR với khóa: $A^{(3)} = A^{(2)} \oplus K_i$.
+- Phép nén lần 1 qua hộp M-Box: $A^{(4)} = \text{M-Box}(A^{(3)}, K_i)$.
+- Bảng logarit (Log Table): $A^{(5)} = \log(A^{(4)})$.
+
+I.2 - Vòng 2: với các trường khóa S lẻ** $i = 2i + 3$
+- Phép XOR với khóa mới (khóa lẻ): $A^{(6)} = A^{(5)} \oplus K_i$.
+- Phép nén lần 2 qua hộp M-Box: $A^{(7)} = \text{M-Box}(A^{(6)}, K_i)$.
+- Bảng mũ (Exponential Table): $A^{(8)} = \exp(A^{(7)})$.
+<br>
+
+**Pha II: Lặp 3 lần thực hiện với trường khóa S từ 1 đến 3**
+
+*Lặp tuần tự: j = 1 đến 3 thực hiện các bước sau:*
+
+1. Phép XOR với khóa tam thức: $A^{(9)} = A^{(8)} \oplus K_j$.
+2. Hoán vị hàng (Row Interchange): $R_m \leftarrow R_{(m+1) \bmod 3}, \quad 0 \le m \le 2$. Tức là hàng thứ $m$ được thay thế bằng hàng kế tiếp (theo chu kỳ $\bmod 3$).
+3. Phép thay thế byte (Sub-Bytes): $A^{(11)} = \text{S-Box}(A^{(10)})$.
+
+**Chuyển đổi sang giá trị thập lục phân:** $A^{(12)} = \text{Hexadecimal}(A^{(11)})$.
