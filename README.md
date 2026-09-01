@@ -112,32 +112,35 @@ MEA_GQA.Decoding_MEAGQA(output_stego_folder)
 
 
 ## Đóng góp chính của nghiên cứu
-
 Nghiên cứu này kế thừa cấu trúc nền tảng của thuật toán MEA (Modular Encryption Algorithm) của IJSRNSC - Author: P.Sri Ram Chandra, G. Venkateswara Rao, G.V. Swamy và đề xuất các cải tiến nhằm nâng cao độ an toàn mật mã (bằng việc mở rộng trường khóa) cũng như tối ưu hóa khả năng ứng dụng trong lĩnh vực giấu tin ảnh số. Các đóng góp chính bao gồm:
 
 <mark>1. Cải tiến cơ chế hoán vị ban đầu trên trường hữu hạn</mark>
-- Thay thế cơ chế hoán vị cố định của MEA gốc bằng phép biến đổi tuyến tính trên trường hữu hạn, kết hợp ma trận khả nghịch và phần tử sinh.
-- Hiệu quả: Mở rộng đáng kể không gian khóa, tăng tính ngẫu nhiên của quá trình hoán vị và nâng cao khả năng chống phân tích tuyến tính nhờ duy trì tính đơn ánh của phép ánh xạ.
+
+  \- Thay thế cơ chế hoán vị cố định của MEA gốc bằng phép biến đổi tuyến tính trên trường hữu hạn, kết hợp ma trận khả nghịch và phần tử sinh.
+  
+  \- Hiệu quả: Mở rộng đáng kể không gian khóa, tăng tính ngẫu nhiên của quá trình hoán vị và nâng cao khả năng chống phân tích tuyến tính nhờ duy trì tính đơn ánh của phép ánh xạ.
 
 <mark>2. Trộn dữ liệu qua các phép XOR cùng giải thuật M-Box</mark>
-- Hòa trộn và che giấu cấu trúc dữ liệu thông qua phép XOR với ma trận khóa, kết hợp các phép ánh xạ Logarithm, Exponentials và Substitution Box.
-- Hàm M-Box: Xây dựng cơ chế ánh xạ phi tuyến biến 4 giá trị hexadecimal thành 2 giá trị hexadecimal, không tồn tại phép nghịch đảo, dựa trên các phép toán trên trường Galois ($GF$).
+
+  \- Hòa trộn và che giấu cấu trúc dữ liệu thông qua phép XOR với ma trận khóa, kết hợp các phép ánh xạ Logarithm, Exponentials và Substitution Box.
+  
+  \- Hàm M-Box: Xây dựng cơ chế ánh xạ phi tuyến biến 4 giá trị hexadecimal thành 2 giá trị hexadecimal, không tồn tại phép nghịch đảo, dựa trên các phép toán trên trường Galois ($GF$).
 
 <mark>3. Tầng hoán vị phi tuyến bậc hai sau mã hóa</mark>
-- Áp dụng phép biến đổi phi tuyến ngay sau khi tạo bản mã bằng MEA để tăng cường tính hỗn loạn (confusion) và khả năng khuếch tán (diffusion).
-- Hiệu quả: Phá vỡ các quan hệ tuyến tính còn tồn tại trong bản mã, làm gia tăng độ phức tạp của cấu trúc mã hóa và nâng cao khả năng chống lại các phương pháp phân tích mật mã (cryptanalysis).
+
+  \- Áp dụng phép biến đổi phi tuyến ngay sau khi tạo bản mã bằng MEA để tăng cường tính hỗn loạn (confusion) và khả năng khuếch tán (diffusion).
+  
+  \- Hiệu quả: Phá vỡ các quan hệ tuyến tính còn tồn tại trong bản mã, làm gia tăng độ phức tạp của cấu trúc mã hóa và nâng cao khả năng chống lại các phương pháp phân tích mật mã (cryptanalysis).
 
 <mark>4. Tích hợp cơ chế giấu tin ảnh RGBA sử dụng LSB kết hợp DES</mark>
-- Mô hình bảo vệ đa lớp: Phân mảnh bản mã và nhúng trực tiếp vào kênh Alpha của ảnh RGBA.
-- Quản lý dữ liệu: Thông tin tiêu đề (header) của mỗi ảnh được mã hóa bằng thuật toán DES để quản lý chính xác số lượng và thứ tự các phân đoạn.
-- Cơ chế nhúng: Nhúng dữ liệu theo quy tắc mã hóa 3 mức trên giá trị Alpha, giúp bảo đảm khôi phục dữ liệu chính xác $100\%$, duy trì chất lượng thị giác của ảnh mang tin (cover image) và tăng cường độ an toàn trong lưu trữ cũng như truyền tải.
 
+  \- Mô hình bảo vệ đa lớp: Phân mảnh bản mã và nhúng trực tiếp vào kênh Alpha của ảnh RGBA.
+  
+  \- Quản lý dữ liệu: Thông tin tiêu đề (header) của mỗi ảnh được mã hóa bằng thuật toán DES để quản lý chính xác số lượng và thứ tự các phân đoạn.
+  
+  \- Cơ chế nhúng: Nhúng dữ liệu theo quy tắc mã hóa 3 mức trên giá trị Alpha, giúp bảo đảm khôi phục dữ liệu chính xác $100\%$, duy trì chất lượng thị giác của ảnh mang tin (cover image) và tăng cường độ an toàn trong lưu trữ cũng như truyền tải.
 
-<h3 align="left">
-  <span style="color:#8B4513;">
-    <b>1. Quá trình sinh khóa</b>
-  </span>
-</h3>
+## 1. Quá trình sinh khóa
 
 Không gian khóa tổng thể của hệ thống được biểu diễn bởi tập hợp:
 <h5 align="center">
@@ -155,13 +158,9 @@ Trong đó, các ma trận $S_{1 \to 35}$ được sinh từ tập tham số $n 
 | $P, B$ | $P$ là số nguyên dương và $B$ là tham số thỏa mãn điều kiện $B > 15 + 225P$. | Xác định miền tham số và các điều kiện ràng buộc cần thiết cho quá trình biến đổi và xử lý bản mã. |
 | $D = 64\text{ bit}$ | Độ dài khóa được sử dụng trong thành phần mật mã DES, với kích thước 64 bit. | Xác định kích thước khóa và không gian khóa tương ứng của hệ thống. |
 
-<h3 align="left">
-  <span style="color:#8B4513;">
-    <b>2. Cải tiến cơ chế hoán vị ban đầu trên trường hữu hạn</b>
-  </span>
-</h3>
+## 2. Cải tiến cơ chế hoán vị ban đầu trên trường hữu hạn
 
-Giả sử $p$ là một số nguyên tố lớn ($p > 255$), $g$ là phần tử sinh của nhóm nhân hữu hạn $\mathbb{F}_p^\times$ và $S_{36} = S \in GL(3, \mathbb{F}_p)$ là một ma trận khả nghịch được sử dụng làm khóa bí mật của hệ mật. Theo định nghĩa của nhóm tuyến tính tổng quát $GL(3, \mathbb{F}_p)$, ma trận $S$ phải thỏa mãn điều kiện $\det(S) \not\equiv 0 \pmod p$. Điều kiện này bảo đảm sự tồn tại của ma trận nghịch đảo $S^{-1}$ sao cho $S S^{-1} \equiv I_3 \pmod p$, trong đó $I_3$ là ma trận đơn vị cấp $3 \times 3$. Tính khả nghịch của $S$ bảo đảm mọi phép biến đổi thực hiện trên dữ liệu đều có thể được khôi phục một cách duy nhất thông qua khóa bí mật tương ứng.
+Giả sử $p$ là một số nguyên tố lớn ($p > 255$), $g$ là phần tử sinh của nhóm nhân hữu hạn $\mathbb{F}_p^{\times}$ và $S \in \text{GL}(3, \mathbb{F}_p)$ là một ma trận khả nghịch được sử dụng làm khóa bí mật của hệ mật. Theo định nghĩa của nhóm tuyến tính tổng quát $\text{GL}(3, \mathbb{F}_p)$, ma trận $S$ phải thỏa mãn điều kiện $\det(S) \not\equiv 0 \pmod p$. Điều kiện này bảo đảm sự tồn tại của ma trận nghịch đảo $S^{-1}$ sao cho $S S^{-1} \equiv I_3 \pmod p$, trong đó $I_3$ là ma trận đơn vị cấp $3 \times 3$. Tính khả nghịch của $S$ bảo đảm mọi phép biến đổi thực hiện trên dữ liệu đều có thể được khôi phục một cách duy nhất thông qua khóa bí mật tương ứng.
 
 **Đầu vào (Input):** Chuỗi bản rõ (*Plaintext*) được chia thành các khối gồm 9 ký tự. Mỗi khối 9 ký tự tương ứng với $9 \times 8 = 72\text{ bit}$ dữ liệu.
 
@@ -179,7 +178,7 @@ a_{10} & a_{11} & a_{12} \\
 a_{20} & a_{21} & a_{22} 
 \end{bmatrix}$$
 
-#### Quy trình mã hóa – giải mã của giai đoạn hoán vị đầu giải thuật MEA tăng cường
+Bảng mô tả - Quy trình mã hóa – giải mã của giai đoạn hoán vị đầu giải thuật MEA tăng cường
 
 | Bước | Mã hóa: $\text{Enc}_{GL(3, \mathbb{F}_p)}(X, g, S)$ | Giải mã: $\text{Dec}_{GL(3, \mathbb{F}_p)}(X, g, S)$ |
 | :---: | :--- | :--- |
@@ -187,13 +186,9 @@ a_{20} & a_{21} & a_{22}
 | **2** | Tính $M = [g^{x_{ij}} \bmod p]$ | Tính $M' = S^{-1}YS$ |
 | **3** | Tính $Y = SMS^{-1}$ | Tính $X = [\log_g(M'_{ij})] \bmod (p - 1)$ |
 
-<h3 align="left">
-  <span style="color:#8B4513;">
-    <b>3. Trộn dữ liệu qua các pha XoR</b>
-  </span>
-</h3>
 
-## Quy trình xử lý các Pha mã hóa
+## 3. Trộn dữ liệu qua các pha XoR
+#### Quy trình xử lý các Pha mã hóa
 
 **Pha I: Lặp 16 lần thực hiện với trường khóa S từ 4 đến 35**
 
@@ -221,7 +216,7 @@ Lặp tuần tự j = 1 đến 3 thực hiện các bước sau:
 
 **Chuyển đổi sang giá trị thập lục phân:** $A^{(12)} = \text{Hexadecimal}(A^{(11)})$.
 
-## Giải thuật sinh bảng tra M-Box
+#### Giải thuật sinh bảng tra M-Box
 
 Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệt tiêu hoàn toàn hàm ngược toán học trực tiếp. Điều này khiến việc khôi phục lại dữ liệu gốc từ đầu ra là không thể thực hiện về mặt tính toán, vô hiệu hóa hoàn toàn các đòn tấn công giải mã ngược ngay cả khi kẻ tấn công sở hữu siêu máy tính.
 
@@ -236,11 +231,7 @@ Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệ
 - Bước 6: Chọn các hạng tử có hệ số lẻ và chia modulo 11B: Từ đa thức kết quả $P(x)$, chỉ giữ lại các hạng tử có hệ số lẻ (bỏ các hệ số chẵn và bỏ hệ số, chỉ giữ phần lũy thừa của $x$). Ví dụ nếu biểu thức thu được là $x^{12} + x^{11} + x^{10} + x^9 + 2x^8 + 2x^7 + 2x^6 + 2x^5 + 2x^4 + 2x^3 + x^2 + x$, thì biểu thức với các hệ số lẻ là $x^{12} + x^{11} + x^{10} + x^9 + x^2 + x$. Biểu thức tương tự khi bỏ qua hệ số (đưa về hệ số 1) là $x^{12} + x^{10} + x^9 + x^5 + x$ và tiến hành chia cho 11B, tức là $x^8 + x^4 + x^3 + x + 1$ kết quả thu được $x^5 + x^3 + x^2 + x + 1$.
 - Bước 7: Chuyển đổi biểu thức đa thức kết quả sang dạng nhị phân và hexadecimal. Ví dụ $x^5 + x^3 + x^2 + x + 1$ tương đương $00101111$ tương đương 2F.
 
-<h3 align="left">
-  <span style="color:#8B4513;">
-    <b>4. Hoán vị phi tuyến bậc hai sau quá trình mã hóa</b>
-  </span>
-</h3>
+## 4. Hoán vị phi tuyến bậc hai sau quá trình mã hóa
 
 Sau bước trộn dữ liệu qua các pha XOR tồn tại $\mathcal{N}$ ma trận $3 \times 3$: $A_n^{(12)}$ với $n \in [1, 2, \dots, \mathcal{N}]$. Nếu $\mathcal{N}$ là số lẻ thì thêm $A_{\mathcal{N}+1}$ vào cuối, ngược lại giữ nguyên.
 
@@ -270,11 +261,7 @@ $$x_i = \frac{-1 + \sqrt{1 + 4 P d_i}}{2P}$$
 | 3 | $d_2 = \lfloor \frac{r_2}{B} \rfloor$ | $r_1 = r_2 - d_2 B$ | $x_2 = \frac{-1 + \sqrt{1 + 4 P d_2}}{2P}$ |
 | 4 | $d_1 = r_1$ | — | $x_1 = \frac{-1 + \sqrt{1 + 4 P d_1}}{2P}$ |
 
-<h3 align="left">
-  <span style="color:#8B4513;">
-    <b>5. Cơ sở giấu ảnh trong kênh màu RGBA</b>
-  </span>
-</h3>
+## 5. Cơ sở giấu ảnh trong kênh màu RGBA
 
 Một ảnh màu kỹ thuật số thông thường có thể được biểu diễn dưới dạng một hàm rời rạc: $I : \Omega \to \{0, 1, \dots, 255\}^3$ trong đó $\Omega = \{(x, y) \mid 0 \le x < H, 0 \le y < W\}$ đại diện cho tập hợp tọa độ pixel của ảnh có chiều cao $H$ và chiều rộng $W$. $I(x, y) = [R(x, y), G(x, y), B(x, y)]$ là vector biểu diễn cường độ của ba kênh màu thành phần bao gồm: Đỏ (Red), Lục (Green), và Lam (Blue). Khi mở rộng sang không gian màu RGBA, mỗi điểm ảnh được bổ sung thêm một kênh độ trong suốt (Alpha): $I'(x, y) = [R(x, y), G(x, y), B(x, y), A(x, y)]$ với $A(x, y) \in [0, 255]$ là giá trị xác định độ mờ đục (opacity) của điểm ảnh tại tọa độ $(x, y)$.
 
