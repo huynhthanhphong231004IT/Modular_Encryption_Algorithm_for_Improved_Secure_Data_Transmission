@@ -226,16 +226,23 @@ Lặp tuần tự j = 1 đến 3 thực hiện các bước sau:
 
 Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệt tiêu hoàn toàn hàm ngược toán học trực tiếp. Điều này khiến việc khôi phục lại dữ liệu gốc từ đầu ra là không thể thực hiện về mặt tính toán, vô hiệu hóa hoàn toàn các đòn tấn công giải mã ngược ngay cả khi kẻ tấn công sở hữu siêu máy tính.
 
-- Đầu vào (Input): Một khối gồm 4 chữ số Hexadecimal.
-- Đầu ra (Output): Một khối gồm 2 chữ số Hexadecimal.
+\- Đầu vào (Input): Một khối gồm 4 chữ số Hexadecimal.
 
-- Bước 1: Biểu diễn dưới dạng nhị phân (ví dụ: 2ACF): Mỗi chữ số Hexadecimal được biểu diễn bằng 4 bit nhị phân. (Ví dụ: F = 1111)
-- Bước 2: Chia dãy bit thành hai phần và biểu diễn dưới dạng đa thức: Chia dãy 16 bit thành 2 phần bằng nhau, mỗi phần gồm 8 bits. Quy định 8 bits trái (left) là $A^{(1)}$, 8 bits phải (right) là $B^{(1)}$. (Ví dụ: 2ACF được tách ra $A^{(1)} = \text{2A} = 00101010$, $B^{(1)} = \text{CF} = 11001111$)
-- Bước 3: Tra cứu khóa từ ma trận $S_{3 \times 3}$ và thực hiện phép toán với dữ liệu: Giá trị khóa 8 bits $K_{i,j}$ được tra cứu từ ma trận khóa $S_{3 \times 3}$ với chỉ số hàng $i = p \bmod 3$ và chỉ số cột $j = g \bmod 3$: $$K_{i,j} = S[p \bmod 3, g \bmod 3]$$. Sau đó, các khối dữ liệu $A^{(1)}$ và $B^{(1)}$ thực hiện phép nhân trường Galois với khóa tương ứng: $$A^{(2)}(x) = \left( A^{(1)}(x) \cdot K_i(x) \right) \bmod G(x)$$ và $$B^{(2)}(x) = \left( B^{(1)}(x) \cdot K_j(x) \right) \bmod G(x)$$ với $G(x) = x^8 + x^4 + x^3 + x + 1$ (tương ứng mã 0x11B).
-- Bước 4: Kiểm tra bit thứ 7 của kết quả và dịch bit có điều kiện: Kiểm tra bit thứ 7 (giá trị 0x80) của dữ liệu. Nếu bit thứ 7 là 1 ($A^{(2)} \text{ AND } \text{0x80} \neq 0$), thực hiện dịch trái 1 bit và khử tràn bằng phép XOR với đa thức 0x11B: $$A^{(3)} = (A^{(2)} \ll 1) \oplus \text{0x11B}$$ (tương tự cho $B^{(3)} = (B^{(2)} \ll 1) \oplus \text{0x11B}$). Ngược lại, nếu bit thứ 7 là 0, giữ nguyên giá trị $A^{(3)} = A^{(2)}$ và $B^{(3)} = B^{(2)}$.
-- Bước 5: Nhân hai đa thức: Thực hiện phép nhân hai đa thức vừa thu được bằng phép nhân đa thức thông thường (không rút gọn theo modulo ở bước này), do đó kết quả là một đa thức bậc cao (thường lớn hơn 8): $$P(x) = A^{(3)} \times B^{(3)}$$
-- Bước 6: Chọn các hạng tử có hệ số lẻ và chia modulo 11B: Từ đa thức kết quả $P(x)$, chỉ giữ lại các hạng tử có hệ số lẻ (bỏ các hệ số chẵn và bỏ hệ số, chỉ giữ phần lũy thừa của $x$). Ví dụ nếu biểu thức thu được là $x^{12} + x^{11} + x^{10} + x^9 + 2x^8 + 2x^7 + 2x^6 + 2x^5 + 2x^4 + 2x^3 + x^2 + x$, thì biểu thức với các hệ số lẻ là $x^{12} + x^{11} + x^{10} + x^9 + x^2 + x$. Biểu thức tương tự khi bỏ qua hệ số (đưa về hệ số 1) là $x^{12} + x^{10} + x^9 + x^5 + x$ và tiến hành chia cho 11B, tức là $x^8 + x^4 + x^3 + x + 1$ kết quả thu được $x^5 + x^3 + x^2 + x + 1$.
-- Bước 7: Chuyển đổi biểu thức đa thức kết quả sang dạng nhị phân và hexadecimal. Ví dụ $x^5 + x^3 + x^2 + x + 1$ tương đương $00101111$ tương đương 2F.
+\- Đầu ra (Output): Một khối gồm 2 chữ số Hexadecimal.
+
+\- Bước 1: Biểu diễn dưới dạng nhị phân (ví dụ: 2ACF): Mỗi chữ số Hexadecimal được biểu diễn bằng 4 bit nhị phân. (Ví dụ: F = 1111)
+
+\- Bước 2: Chia dãy bit thành hai phần và biểu diễn dưới dạng đa thức: Chia dãy 16 bit thành 2 phần bằng nhau, mỗi phần gồm 8 bits. Quy định 8 bits trái (left) là $A^{(1)}$, 8 bits phải (right) là $B^{(1)}$. (Ví dụ: 2ACF được tách ra $A^{(1)} = \text{2A} = 00101010$, $B^{(1)} = \text{CF} = 11001111$)
+
+\- Bước 3: Tra cứu khóa từ ma trận $S_{3 \times 3}$ và thực hiện phép toán với dữ liệu: Giá trị khóa 8 bits $K_{i,j}$ được tra cứu từ ma trận khóa $S_{3 \times 3}$ với chỉ số hàng $i = p \bmod 3$ và chỉ số cột $j = g \bmod 3$: $$K_{i,j} = S[p \bmod 3, g \bmod 3]$$. Sau đó, các khối dữ liệu $A^{(1)}$ và $B^{(1)}$ thực hiện phép nhân trường Galois với khóa tương ứng: $$A^{(2)}(x) = \left( A^{(1)}(x) \cdot K_i(x) \right) \bmod G(x)$$ và $$B^{(2)}(x) = \left( B^{(1)}(x) \cdot K_j(x) \right) \bmod G(x)$$ với $G(x) = x^8 + x^4 + x^3 + x + 1$ (tương ứng mã 0x11B).
+
+\- Bước 4: Kiểm tra bit thứ 7 của kết quả và dịch bit có điều kiện: Kiểm tra bit thứ 7 (giá trị 0x80) của dữ liệu. Nếu bit thứ 7 là 1 ($A^{(2)} \text{ AND } \text{0x80} \neq 0$), thực hiện dịch trái 1 bit và khử tràn bằng phép XOR với đa thức 0x11B: $$A^{(3)} = (A^{(2)} \ll 1) \oplus \text{0x11B}$$ (tương tự cho $B^{(3)} = (B^{(2)} \ll 1) \oplus \text{0x11B}$). Ngược lại, nếu bit thứ 7 là 0, giữ nguyên giá trị $A^{(3)} = A^{(2)}$ và $B^{(3)} = B^{(2)}$.
+
+\- Bước 5: Nhân hai đa thức: Thực hiện phép nhân hai đa thức vừa thu được bằng phép nhân đa thức thông thường (không rút gọn theo modulo ở bước này), do đó kết quả là một đa thức bậc cao (thường lớn hơn 8): $$P(x) = A^{(3)} \times B^{(3)}$$
+
+\- Bước 6: Chọn các hạng tử có hệ số lẻ và chia modulo 11B: Từ đa thức kết quả $P(x)$, chỉ giữ lại các hạng tử có hệ số lẻ (bỏ các hệ số chẵn và bỏ hệ số, chỉ giữ phần lũy thừa của $x$). Ví dụ nếu biểu thức thu được là $x^{12} + x^{11} + x^{10} + x^9 + 2x^8 + 2x^7 + 2x^6 + 2x^5 + 2x^4 + 2x^3 + x^2 + x$, thì biểu thức với các hệ số lẻ là $x^{12} + x^{11} + x^{10} + x^9 + x^2 + x$. Biểu thức tương tự khi bỏ qua hệ số (đưa về hệ số 1) là $x^{12} + x^{10} + x^9 + x^5 + x$ và tiến hành chia cho 11B, tức là $x^8 + x^4 + x^3 + x + 1$ kết quả thu được $x^5 + x^3 + x^2 + x + 1$.
+
+\- Bước 7: Chuyển đổi biểu thức đa thức kết quả sang dạng nhị phân và hexadecimal. Ví dụ $x^5 + x^3 + x^2 + x + 1$ tương đương $00101111$ tương đương 2F.
 
 ## 4. Hoán vị phi tuyến bậc hai sau quá trình mã hóa
 
@@ -273,17 +280,17 @@ Một ảnh màu kỹ thuật số thông thường có thể được biểu di
 
 Giả sử thông điệp cần giấu $M$ là một chuỗi ký tự bất kỳ. Trước khi thực hiện nhúng, thông điệp này được mã hóa sang chuỗi nhị phân dưới dạng $M_b = (b_1, b_2, b_3, \dots, b_L)$, $b_i \in \{0, 1\}$ với $L = 8 \times \text{len}(M)$ là tổng số bit cần giấu. Mỗi bit $b_i$ sẽ được ánh xạ tương ứng vào một pixel $(x_i, y_i)$ cụ thể trên ảnh.
 
-Bước 1: Phân chia thông điệp theo kích thước ảnh: Đối với một ảnh có kích thước $H \times W$, tổng số lượng điểm ảnh khả dụng được tính bằng $N_{\text{pixels}} = H \cdot W$. Để dành không gian cho thông tin điều khiển, kích thước tối đa của phần phân đoạn dữ liệu $L'$ trong mỗi ảnh được xác định bởi công thức $L' = N_{\text{pixels}} - 64$. Giả sử toàn bộ thông điệp nhị phân $M$ có độ dài tổng cộng là $L_M$. Số lượng phân đoạn ảnh $n$ cần thiết để phân tán thông điệp được tính bằng phép lấy trần $n = \lceil \frac{L_M}{L'} \rceil$. Khi đó, phân đoạn thứ $i$ (với $i = 1, 2, \dots, n$) của thông điệp được trích xuất bằng kỹ thuật cắt chuỗi $M_i = M[(i - 1)L' : \min(iL', L_M)]$.
+\- Bước 1: Phân chia thông điệp theo kích thước ảnh: Đối với một ảnh có kích thước $H \times W$, tổng số lượng điểm ảnh khả dụng được tính bằng $N_{\text{pixels}} = H \cdot W$. Để dành không gian cho thông tin điều khiển, kích thước tối đa của phần phân đoạn dữ liệu $L'$ trong mỗi ảnh được xác định bởi công thức $L' = N_{\text{pixels}} - 64$. Giả sử toàn bộ thông điệp nhị phân $M$ có độ dài tổng cộng là $L_M$. Số lượng phân đoạn ảnh $n$ cần thiết để phân tán thông điệp được tính bằng phép lấy trần $n = \lceil \frac{L_M}{L'} \rceil$. Khi đó, phân đoạn thứ $i$ (với $i = 1, 2, \dots, n$) của thông điệp được trích xuất bằng kỹ thuật cắt chuỗi $M_i = M[(i - 1)L' : \min(iL', L_M)]$.
 
-Bước 2: Sinh cấu trúc khối thông tin điều khiển (Header): Trong 64 pixel đầu tiên của mỗi ảnh, hệ thống cấu trúc 64 bit dữ liệu điều khiển nhằm phục vụ cho giải thuật giải mã, bao gồm: (1) Với 32 bit đầu tiên: Biểu diễn nhị phân của tổng số lượng ảnh $N$ được phát đi trong toàn bộ quá trình truyền thông; (2) Với 32 bit tiếp theo: Biểu diễn nhị phân của số thứ tự chỉ mục $i$ của phân đoạn thông điệp được lưu trữ trong chính ảnh hiện tại. Cấu trúc phân bổ thông tin điều khiển tổng quát được biểu diễn dưới dạng sơ đồ bit như sau:
+\- Bước 2: Sinh cấu trúc khối thông tin điều khiển (Header): Trong 64 pixel đầu tiên của mỗi ảnh, hệ thống cấu trúc 64 bit dữ liệu điều khiển nhằm phục vụ cho giải thuật giải mã, bao gồm: (1) Với 32 bit đầu tiên: Biểu diễn nhị phân của tổng số lượng ảnh $N$ được phát đi trong toàn bộ quá trình truyền thông; (2) Với 32 bit tiếp theo: Biểu diễn nhị phân của số thứ tự chỉ mục $i$ của phân đoạn thông điệp được lưu trữ trong chính ảnh hiện tại. Cấu trúc phân bổ thông tin điều khiển tổng quát được biểu diễn dưới dạng sơ đồ bit như sau:
 
 $$\begin{aligned}
 \text{Header}_{\text{image}} = \underbrace{bit_1 bit_2 \dots bit_{32}}_{\text{Tổng số lượng ảnh } N} \quad \underbrace{bit_{33} bit_{34} \dots bit_{64}}_{\text{Chỉ mục ảnh hiện tại } i}
 \end{aligned}$$
 
-Bước 3: Sử dụng mật mã DES mã hóa 64 bits chỉ mục: Để tăng cường tính bảo mật, thuật toán sử dụng hệ mã hóa đối xứng DES (Data Encryption Standard) để mã hóa toàn bộ 64 bit của khối Header này trước khi nhúng. Phần không gian pixel còn lại của ảnh sẽ được dùng để lưu trữ nội dung thông điệp thực tế.
+\- Bước 3: Sử dụng mật mã DES mã hóa 64 bits chỉ mục: Để tăng cường tính bảo mật, thuật toán sử dụng hệ mã hóa đối xứng DES (Data Encryption Standard) để mã hóa toàn bộ 64 bit của khối Header này trước khi nhúng. Phần không gian pixel còn lại của ảnh sẽ được dùng để lưu trữ nội dung thông điệp thực tế.
 
-Bước 4: Nguyên lý nhúng dữ liệu thông điệp: Thuật toán áp dụng kỹ thuật thay thế bit ít quan trọng nhất (Least Significant Bit - LSB) nhưng được tùy biến để chỉ tác động lên kênh Alpha ($A$). Nhằm đảm bảo tính vô hình về mặt thị giác đối với mắt người, giá trị của kênh Alpha được duy trì tiệm cận mức bão hòa 255 theo quy tắc hàm phân tách sau:
+\- Bước 4: Nguyên lý nhúng dữ liệu thông điệp: Thuật toán áp dụng kỹ thuật thay thế bit ít quan trọng nhất (Least Significant Bit - LSB) nhưng được tùy biến để chỉ tác động lên kênh Alpha ($A$). Nhằm đảm bảo tính vô hình về mặt thị giác đối với mắt người, giá trị của kênh Alpha được duy trì tiệm cận mức bão hòa 255 theo quy tắc hàm phân tách sau:
 
 $$\begin{aligned}
 A'(x_i, y_i) &= 253, && \text{if the pixel does not contain data} \\
@@ -296,7 +303,7 @@ Sau khi nhúng, mô hình biểu diễn của ảnh đã mã hóa trở thành $
 
 ## Kết quả thảo luận
 
-<p align="center">
+<p align="left">
   <img src="Images/Time.jpg" width="500">
   <br>
   <i> Biểu đồ so sánh các thời gian các bước giữa MEA và MEA-GQA</i>
@@ -313,7 +320,7 @@ Bảng đánh giá chất lượng mã hóa văn bản
 | Hamming distance | 1010 | Khả năng khuếch tán bit tốt. |
 | Bit diffusion (%) | 40.01 | Hiệu ứng avalanche tốt, gần mức lý tưởng. |
 
-<p align="center">
+<p align="left">
   <img src="Images/histogramMEAtc.png" width="700">
   <br>
   <i> So sánh histogram màu ảnh trước và sau khi giấu tin</i>
