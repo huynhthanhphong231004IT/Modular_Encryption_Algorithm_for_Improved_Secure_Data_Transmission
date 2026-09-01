@@ -270,3 +270,28 @@ $$x_i = \frac{-1 + \sqrt{1 + 4 P d_i}}{2P}$$
 | 3 | $d_2 = \lfloor \frac{r_2}{B} \rfloor$ | $r_1 = r_2 - d_2 B$ | $x_2 = \frac{-1 + \sqrt{1 + 4 P d_2}}{2P}$ |
 | 4 | $d_1 = r_1$ | — | $x_1 = \frac{-1 + \sqrt{1 + 4 P d_1}}{2P}$ |
 
+<h3 align="left">
+  <span style="color:#8B4513;">
+    <b>5. Cơ sở giấu ảnh trong kênh màu RGBA</b>
+  </span>
+</h3>
+
+Một ảnh màu kỹ thuật số thông thường có thể được biểu diễn dưới dạng một hàm rời rạc: $I : \Omega \to \{0, 1, \dots, 255\}^3$ trong đó $\Omega = \{(x, y) \mid 0 \le x < H, 0 \le y < W\}$ đại diện cho tập hợp tọa độ pixel của ảnh có chiều cao $H$ và chiều rộng $W$. $I(x, y) = [R(x, y), G(x, y), B(x, y)]$ là vector biểu diễn cường độ của ba kênh màu thành phần bao gồm: Đỏ (Red), Lục (Green), và Lam (Blue). Khi mở rộng sang không gian màu RGBA, mỗi điểm ảnh được bổ sung thêm một kênh độ trong suốt (Alpha): $I'(x, y) = [R(x, y), G(x, y), B(x, y), A(x, y)]$ với $A(x, y) \in [0, 255]$ là giá trị xác định độ mờ đục (opacity) của điểm ảnh tại tọa độ $(x, y)$.
+
+Giả sử thông điệp cần giấu $M$ là một chuỗi ký tự bất kỳ. Trước khi thực hiện nhúng, thông điệp này được mã hóa sang chuỗi nhị phân dưới dạng $M_b = (b_1, b_2, b_3, \dots, b_L)$, $b_i \in \{0, 1\}$ với $L = 8 \times \text{len}(M)$ là tổng số bit cần giấu. Mỗi bit $b_i$ sẽ được ánh xạ tương ứng vào một pixel $(x_i, y_i)$ cụ thể trên ảnh.
+
+Bước 1: Phân chia thông điệp theo kích thước ảnh: Đối với một ảnh có kích thước $H \times W$, tổng số lượng điểm ảnh khả dụng được tính bằng $N_{\text{pixels}} = H \cdot W$. Để dành không gian cho thông tin điều khiển, kích thước tối đa của phần phân đoạn dữ liệu $L'$ trong mỗi ảnh được xác định bởi công thức $L' = N_{\text{pixels}} - 64$. Giả sử toàn bộ thông điệp nhị phân $M$ có độ dài tổng cộng là $L_M$. Số lượng phân đoạn ảnh $n$ cần thiết để phân tán thông điệp được tính bằng phép lấy trần $n = \lceil \frac{L_M}{L'} \rceil$. Khi đó, phân đoạn thứ $i$ (với $i = 1, 2, \dots, n$) của thông điệp được trích xuất bằng kỹ thuật cắt chuỗi $M_i = M[(i - 1)L' : \min(iL', L_M)]$.
+
+Bước 2: Sinh cấu trúc khối thông tin điều khiển (Header): Trong 64 pixel đầu tiên của mỗi ảnh, hệ thống cấu trúc 64 bit dữ liệu điều khiển nhằm phục vụ cho giải thuật giải mã, bao gồm: (1) Với 32 bit đầu tiên: Biểu diễn nhị phân của tổng số lượng ảnh $N$ được phát đi trong toàn bộ quá trình truyền thông; (2) Với 32 bit tiếp theo: Biểu diễn nhị phân của số thứ tự chỉ mục $i$ của phân đoạn thông điệp được lưu trữ trong chính ảnh hiện tại. Cấu trúc phân bổ thông tin điều khiển tổng quát được biểu diễn dưới dạng sơ đồ bit như sau:
+
+$$\begin{aligned}
+\text{Header}_{\text{image}} = \underbrace{bit_1 bit_2 \dots bit_{32}}_{\text{Tổng số lượng ảnh } N} \quad \underbrace{bit_{33} bit_{34} \dots bit_{64}}_{\text{Chỉ mục ảnh hiện tại } i}
+\end{aligned}$$
+
+Bước 3: Sử dụng mật mã DES mã hóa 64 bits chỉ mục: Để tăng cường tính bảo mật, thuật toán sử dụng hệ mã hóa đối xứng DES (Data Encryption Standard) để mã hóa toàn bộ 64 bit của khối Header này trước khi nhúng. Phần không gian pixel còn lại của ảnh sẽ được dùng để lưu trữ nội dung thông điệp thực tế.
+
+Bước 4: Nguyên lý nhúng dữ liệu thông điệp: Thuật toán áp dụng kỹ thuật thay thế bit ít quan trọng nhất (Least Significant Bit - LSB) nhưng được tùy biến để chỉ tác động lên kênh Alpha ($A$). Nhằm đảm bảo tính vô hình về mặt thị giác đối với mắt người, giá trị của kênh Alpha được duy trì tiệm cận mức bão hòa 255 theo quy tắc hàm phân tách sau:
+
+$$A'(x_i, y_i) = \begin{cases} 253, & \text{if the pixel does not contain data} \\ 254, & \text{if embedding bit } b_i = 0 \\ 255, & \text{if embedding bit } b_i = 1 \end{cases}$$
+
+Sau khi nhúng, mô hình biểu diễn của ảnh đã mã hóa trở thành $I'_{\text{encoded}}(x, y) = [R(x, y), G(x, y), B(x, y), A'(x, y)]$. Dung lượng giấu tin cực đại $C$ tính bằng bit trên một thực thể ảnh tuần theo giới hạn hình học $C = H \times W \quad (\text{bits})$.
