@@ -141,7 +141,7 @@ Nghiên cứu này kế thừa cấu trúc nền tảng của thuật toán MEA 
   \- Cơ chế nhúng: Nhúng dữ liệu theo quy tắc mã hóa 3 mức trên giá trị Alpha, giúp bảo đảm khôi phục dữ liệu chính xác $100\%$, duy trì chất lượng thị giác của ảnh mang tin (cover image) và tăng cường độ an toàn trong lưu trữ cũng như truyền tải.
 
 <p align="center">
-  <img src="Images/flowMEAGQA.png" width="800">
+  <img src="Images/flowMEAGQA.png" width="600">
   <br>
   <i>Flow giản lược của mô hình mã hóa mô - đun trên dữ liệu đường truyền cải tiến (MEA-GQA) </i>
 </p>
