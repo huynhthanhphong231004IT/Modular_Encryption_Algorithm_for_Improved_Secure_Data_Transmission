@@ -75,6 +75,15 @@ stego_result_dir = MEA_GQA.Encryption_MEAGQA(
       output_stego_dir=output_stego_folder)
 ```
 
+<p>
+  Step 5. Decrypt the data.
+</p>
+
+```python
+MEA_GQA.Decoding_MEAGQA(output_stego_folder)
+```
+
+
 > [!NOTE]
 > **`input_text_file`**: The path to the input text file containing the data or secret message you want to encrypt or hide.
 >
@@ -83,10 +92,3 @@ stego_result_dir = MEA_GQA.Encryption_MEAGQA(
 > **`output_stego_folder`**: The path to the folder containing the destination image files with hidden information.
 
 
-<p>
-  Step 5. Decrypt the data.
-</p>
-
-```python
-MEA_GQA.Decoding_MEAGQA(output_stego_folder)
-```
