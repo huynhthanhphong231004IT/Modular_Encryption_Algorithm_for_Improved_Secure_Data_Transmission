@@ -13,83 +13,98 @@ from Create_Lookup_Table.D_MBox import build_inverse_table
 
 DMBOX_CACHE = {}
 
-def apply_dmbox_matrix(A_matrix, k_val):
-    """
-    Áp dụng giải mã D_MBox sử dụng chính hàm `build_inverse_table` từ D_MBox.py.
-    """
+def ensure_subkeys_dict(subkeys):
+    if isinstance(subkeys, dict):
+        return subkeys
+    if isinstance(subkeys, (list, tuple, np.ndarray)):
+        arr = np.array(subkeys, dtype=object)
+        if arr.ndim == 2:
+            return {i: arr for i in range(1, 37)}
+        return {idx + 1: mat for idx, mat in enumerate(arr)}
+    return {}
+
+def get_dmbox_lut(k_val):
     k_val = int(k_val) & 0xFFFF
-    
-    # 1. Tạo cache bảng đảo từ D_MBox để tránh tính toán lại nhiều lần
     if k_val not in DMBOX_CACHE:
         forward_lut = build_mbox_lut(k_val)
         DMBOX_CACHE[k_val] = build_inverse_table(forward_lut)
-        
-    inv_table = DMBOX_CACHE[k_val]
-    
-    # 2. Hàm tra cứu ngược từng giá trị byte mã hóa (y_val) ra giá trị gốc (x_val)
-    def lookup_inverse(y_val):
-        y_hex = f"{y_val & 0xFF:02X}"
-        candidates = inv_table.get(y_hex, [])
-        return candidates[0] if candidates else 0
+    return DMBOX_CACHE[k_val]
 
-    return np.vectorize(lookup_inverse)(A_matrix)
+def apply_dmbox_elementwise(A_matrix, K_matrix):
+    result = np.zeros_like(A_matrix, dtype=np.int64)
+    rows, cols = A_matrix.shape
+    for r in range(rows):
+        for c in range(cols):
+            y_int = int(A_matrix[r, c]) & 0xFFFF
+            k_val = int(K_matrix[r, c]) if isinstance(K_matrix, np.ndarray) else int(K_matrix)
+            inv_lut = get_dmbox_lut(k_val)
+            y_hex = f"{y_int:04X}"
+            val = inv_lut.get(y_hex, 0)
+            if isinstance(val, str):
+                val = int(val, 16)
+            result[r, c] = int(val) & 0xFFFF
+    return result
 
 def get_inverse_sbox(sbox_table):
-    """Tạo bảng S-Box ngược."""
     inv_sbox = np.zeros_like(sbox_table)
     for idx, val in enumerate(sbox_table):
-        inv_sbox[val & 0xFF] = idx
+        inv_sbox[int(val) & 0xFF] = idx
     return inv_sbox
 
-# --- DESHIFT & DECRYPT PHASE 2 ---
+def inv_exp_16bit(x, log_table):
+    val = int(x) & 0xFFFF
+    hi = (val >> 8) & 0xFF
+    lo = val & 0xFF
+    new_hi = 0 if hi == 0 else int(log_table[hi]) & 0xFF
+    new_lo = 0 if lo == 0 else int(log_table[lo]) & 0xFF
+    return (new_hi << 8) | new_lo
+
+def inv_log_16bit(x, exp_table):
+    val = int(x) & 0xFFFF
+    hi = (val >> 8) & 0xFF
+    lo = val & 0xFF
+    new_hi = 0 if hi == 0 else int(exp_table[hi]) & 0xFF
+    new_lo = 0 if lo == 0 else int(exp_table[lo]) & 0xFF
+    return (new_hi << 8) | new_lo
+
 def decrypt_phase_2(A11, subkeys, inv_sbox_table):
+    subkeys = ensure_subkeys_dict(subkeys)
     A = np.copy(A11)
     num_rows = A.shape[0]
     
-    # Đảo ngược Phase 2: Chạy ngược từ j = 3 về 1
-    for j in range(3, 0, -1):
-        # Step 1: Reverse S-Box
-        A10 = np.vectorize(lambda x: inv_sbox_table[x & 0xFF])(A)
+    def inv_sbox_16bit(x):
+        val = int(x) & 0xFFFF
+        hi = int(inv_sbox_table[(val >> 8) & 0xFF]) & 0xFF
+        lo = int(inv_sbox_table[val & 0xFF]) & 0xFF
+        return (hi << 8) | lo
         
-        # Step 2: Reverse Shift Rows (Dịch hàng xuống lại vị trí ban đầu)
+    for j in range(3, 0, -1):
+        A10 = np.vectorize(inv_sbox_16bit)(A)
         A9 = np.empty_like(A10)
         for m in range(num_rows):
-            A9[(m + 1) % num_rows] = A10[m]
+            A9[m] = A10[(m - 1) % num_rows]
             
-        # Step 3: Reverse XOR Subkey K_j
         K_j = subkeys.get(j, np.full(A.shape, 0x01 * j, dtype=int))
         A = np.bitwise_xor(A9, K_j)
         
     return A
 
-# --- DECRYPT PHASE 1 ---
 def decrypt_phase_1(A8, subkeys, log_table, exp_table):
+    subkeys = ensure_subkeys_dict(subkeys)
     A = np.copy(A8)
     
-    # Đảo ngược Phase 1: Chạy ngược từ vòng 16 về 1
     for i in range(16, 0, -1):
-        K_even = subkeys.get(2 * i + 2, np.full(A.shape, 0x55, dtype=int))
-        K_odd  = subkeys.get(2 * i + 3, np.full(A.shape, 0xAA, dtype=int))
+        k_odd_idx  = 2 * i + 3
+        k_even_idx = 2 * i + 2
         
-        k_even_val = int(K_even[0, 0]) if isinstance(K_even, np.ndarray) else int(K_even)
-        k_odd_val  = int(K_odd[0, 0]) if isinstance(K_odd, np.ndarray) else int(K_odd)
+        K_odd = subkeys.get(k_odd_idx, np.full(A.shape, 0xAA, dtype=int))
+        K_even = subkeys.get(k_even_idx, np.full(A.shape, 0x55, dtype=int))
         
-        # 1. Reverse Exp -> Log
-        A7 = np.vectorize(lambda x: log_table[x & 0xFF] if (x & 0xFF) != 0 else 0)(A)
-        
-        # 2. Reverse M-Box (D_MBox) với k_odd
-        A6 = apply_dmbox_matrix(A7, k_odd_val)
-        
-        # 3. Reverse XOR K_odd
+        A7 = np.vectorize(lambda x: inv_exp_16bit(x, log_table))(A)
+        A6 = apply_dmbox_elementwise(A7, K_odd)
         A5 = np.bitwise_xor(A6, K_odd)
-        
-        # 4. Reverse Log -> Exp
-        A4 = np.vectorize(lambda x: exp_table[x & 0xFF] if (x & 0xFF) != 0 else 0)(A5)
-        
-        # 5. Reverse M-Box (D_MBox) với k_even
-        A3 = apply_dmbox_matrix(A4, k_even_val)
-        
-        # 6. Reverse XOR K_even
+        A4 = np.vectorize(lambda x: inv_log_16bit(x, exp_table))(A5)
+        A3 = apply_dmbox_elementwise(A4, K_even)
         A2 = np.bitwise_xor(A3, K_even)
         
         A = A2
@@ -97,60 +112,62 @@ def decrypt_phase_1(A8, subkeys, log_table, exp_table):
     return A
 
 def decrypt_Phase_pipeline(A11, subkeys, log_table, exp_table, inv_sbox_table):
+    subkeys = ensure_subkeys_dict(subkeys)
     A8_recovered = decrypt_phase_2(A11, subkeys, inv_sbox_table)
     A2_recovered = decrypt_phase_1(A8_recovered, subkeys, log_table, exp_table)
     return A2_recovered
 
 if __name__ == "__main__":
     content_dir = os.path.join(PROJECT_ROOT, "Content")
-    data_file = os.path.join(content_dir, "encrypted_data.npz")
-    
-    if not os.path.exists(data_file):
-        print(f"[!] Không tìm thấy file {data_file}.")
+    input_file = os.path.join(content_dir, "E_Phase.npz")
+    output_npz = os.path.join(content_dir, "D_Phase.npz")
+
+    if not os.path.exists(input_file):
+        print(f"[!] Không tìm thấy file đầu vào: {input_file}")
         sys.exit(1)
-        
-    data = np.load(data_file, allow_pickle=True)
-    
-    # Ưu tiên lấy bản mã Phase 2 nếu có sẵn trong NPZ, nếu không sẽ dùng ciphertext mặc định
-    if 'phase2_cipher' in data.files:
-        cipher_blocks = data['phase2_cipher']
-    else:
-        cipher_blocks = data['ciphertext']
 
-    def parse_to_int_array(block):
-        arr = np.array(block)
-        if arr.dtype.kind in ['U', 'S', 'O']: 
-            flat = arr.flatten()
-            converted = [int(x, 16) if isinstance(x, str) else int(x) for x in flat]
-            return np.array(converted, dtype=np.int64).reshape(arr.shape)
-        return arr.astype(np.int64)
+    data = np.load(input_file, allow_pickle=True)
+    phase2_blocks = data['phase2_cipher'] if 'phase2_cipher' in data.files else data['cipher']
+    original_input = data['cipher'] if 'cipher' in data.files else None
+    pad_len = int(data['pad_len']) if 'pad_len' in data.files else 0
 
-    mea_cipher_blocks = [parse_to_int_array(b) for b in cipher_blocks]
-    
-    # Nạp Subkeys
     try:
         keys_dict = load_keys()
         mea_matrices = keys_dict.get("mea_matrices", [])
         subkeys = {
-            idx + 1: parse_to_int_array(mat) 
+            idx + 1: np.array(mat, dtype=np.int64) 
             for idx, mat in enumerate(mea_matrices)
         } if isinstance(mea_matrices, (list, np.ndarray)) else keys_dict.get("mea_matrices", {})
     except Exception:
-        subkeys = {k: np.full((3, 3), k, dtype=np.int64) for k in range(1, 36)}
+        subkeys = {k: np.full((3, 3), k, dtype=np.int64) for k in range(1, 37)}
 
-    # Nạp các bảng tra cứu
+    subkeys = ensure_subkeys_dict(subkeys)
     log_table, exp_table = generate_log_exp_tables()
     sbox_table = get_sbox()
     inv_sbox_table = get_inverse_sbox(sbox_table)
 
-    # Giải mã toàn bộ các khối
-    decrypted_blocks = [
+    recovered_blocks = [
         decrypt_Phase_pipeline(block, subkeys, log_table, exp_table, inv_sbox_table)
-        for block in mea_cipher_blocks
+        for block in phase2_blocks
     ]
 
     print("\n" + "=" * 60)
-    print("GIẢI MÃ HOÀN TẤT VỚI D_MBOX (D_Phase.py)")
-    print(f"Tổng số khối đã giải mã : {len(decrypted_blocks)}")
-    print(f"Ma trận gốc A2 khối 1   :\n{decrypted_blocks[0]}")
+    print("GIẢI MÃ PHASE HOÀN TẤT (D_Phase.py)")
     print("=" * 60)
+
+    if original_input is not None:
+        print("\n=== KIỂM TRA TÍNH CHÍNH XÁC (E_Phase vs D_Phase) ===")
+        all_matched = True
+        for idx, (orig, rec) in enumerate(zip(original_input, recovered_blocks)):
+            if np.array_equal(orig, rec):
+                print(f"[✓] Block {idx + 1}: KHỚP HOÀN TOÀN (100%)")
+            else:
+                all_matched = False
+                print(f"[X] Block {idx + 1}: KHÔNG KHỚP!")
+                print(" -> Gốc    :\n", orig)
+                print(" -> Giải mã:\n", rec)
+        
+        if all_matched:
+            print("\n>>> KẾT LUẬN: THÀNH CÔNG! Mã hóa và giải mã khớp 100%. <<<")
+        else:
+            print("\n>>> KẾT LUẬN: THẤT BẠI! Hãy kiểm tra lại logic Phase 1. <<<")

@@ -2,7 +2,6 @@ import json
 import os
 import sys
 import numpy as np
-import sympy as sp
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
@@ -45,45 +44,40 @@ def gf_mul_gf2(a: int, b: int) -> int:
 
 def build_mbox_lut(key_K_ij: int) -> dict:
     mbox_lut = {}
-    print(f"[+] [E_MBox] Đang sinh LUT với Khóa K_ij = {hex(key_K_ij)}...")
+    print(f"[+] [E_MBox] Đang sinh LUT 16-bit với Khóa K_ij = {hex(key_K_ij)}...")
     
     for val in range(0x10000): 
         hex_in = f"{val:04X}"
         A1 = (val >> 8) & 0xFF
         B1 = val & 0xFF
+        
         A2 = gf_mul(A1, key_K_ij)
         B2 = gf_mul(B1, key_K_ij)
-        A3 = ((A2 << 1) ^ G_POLY) & 0xFF if (A2 & 0x80) else A2
-        B3 = ((B2 << 1) ^ G_POLY) & 0xFF if (B2 & 0x80) else B2 
-        if A3 != 0 and B3 != 0:
-            p_mask = gf_mul_gf2(A3, B3)  
-            remainder = poly_div_mod_gf2(p_mask, G_POLY)
-        else:
-            remainder = 0
-            
-        mbox_lut[hex_in] = f"{remainder:02X}"
+        
+        # ĐÃ SỬA: Dịch trái (A2 << 1) ở cả 2 nhánh để đảm bảo song ánh 1-1
+        A3 = ((A2 << 1) ^ G_POLY) & 0xFF if (A2 & 0x80) else (A2 << 1)
+        B3 = ((B2 << 1) ^ G_POLY) & 0xFF if (B2 & 0x80) else (B2 << 1)
+        
+        rem_A = poly_div_mod_gf2(gf_mul_gf2(A3, key_K_ij), G_POLY) if A3 != 0 else 0
+        rem_B = poly_div_mod_gf2(gf_mul_gf2(B3, key_K_ij), G_POLY) if B3 != 0 else 0
+        
+        remainder_16bit = (rem_A << 8) | rem_B
+        mbox_lut[hex_in] = f"{remainder_16bit:04X}"
         
     return mbox_lut
 
 def encrypt_from_npz(filename="encrypted_data.npz"):
     content_dir = os.path.join(PROJECT_ROOT, "Content")
     npz_path = os.path.join(content_dir, filename)
-    
-    base_name = os.path.splitext(os.path.basename(filename))[0]
-    json_path = os.path.join(content_dir, f"{base_name}_MBox_LUT.json")
+    json_path = os.path.join(content_dir, f"{os.path.splitext(filename)[0]}_MBox_LUT.json")
     
     if not os.path.exists(npz_path):
         os.makedirs(content_dir, exist_ok=True)
         default_text = "HELLO HUYNH THANH PHONG (Reo Rioll)"
         np.savez(npz_path, plaintext=np.array([default_text]))
-        print(f"[!] File chưa tồn tại. Đã tự tạo file mẫu với văn bản: '{default_text}'")
         
     input_data = np.load(npz_path, allow_pickle=True)
-    if 'plaintext' in input_data:
-        plaintext = str(input_data['plaintext'][0])
-    else:
-        first_key = input_data.files[0]
-        plaintext = str(input_data[first_key][0])
+    plaintext = str(input_data['plaintext'][0]) if 'plaintext' in input_data else str(input_data[input_data.files[0]][0])
         
     keys = load_keys()
     p, g = keys["p"], keys["g"]
@@ -106,7 +100,6 @@ def encrypt_from_npz(filename="encrypted_data.npz"):
         
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(fwd_lut, f, indent=4)
-    print(f"[+] Đã xuất file JSON bảng M-Box riêng biệt: {json_path}")
     
     lut_json_str = json.dumps(fwd_lut)
     np.savez_compressed(
@@ -116,11 +109,40 @@ def encrypt_from_npz(filename="encrypted_data.npz"):
         K_ij=np.array([K_ij]),
         K_16=np.array([K_16]),
         lut_json=np.array([lut_json_str])
-        
     )
-    print(f"[SUCCESS] [E_MBox] Đã mã hóa xong và lưu kết quả vào: {npz_path}")
+    print(f"[SUCCESS] Đã mã hóa xong!")
     return plaintext, cipher_list, K_16
 
-# if __name__ == "__main__":
-#     target_filename = "encrypted_data.npz"
-#     plaintext, ciphertext, K_16 = encrypt_from_npz(target_filename)
+def build_inverse_table(forward_lut: dict) -> dict:
+    inv_table = {}
+    for x_hex, y_hex in forward_lut.items():
+        inv_table[y_hex] = int(x_hex, 16)
+    return inv_table
+
+def decrypt_from_npz(filename="encrypted_data.npz") -> tuple:
+    content_dir = os.path.join(PROJECT_ROOT, "Content")
+    npz_path = os.path.join(content_dir, filename)
+    
+    if not os.path.exists(npz_path):
+        raise FileNotFoundError(f"Không tìm thấy file: {npz_path}")
+        
+    data = np.load(npz_path, allow_pickle=True)
+    cipher_array = data['ciphertext']
+    K_16 = int(data['K_16'][0])
+    lut_json_str = str(data['lut_json'][0])
+    
+    fwd_lut = json.loads(lut_json_str)
+    inv_table = build_inverse_table(fwd_lut)
+    
+    recovered_chars = []
+    for y_hex in cipher_array:
+        y_target = y_hex.upper().zfill(4)
+        if y_target in inv_table:
+            X_cand = inv_table[y_target]
+            char_code = X_cand ^ K_16
+            recovered_chars.append(chr(char_code))
+        else:
+            recovered_chars.append("?")
+
+    recovered_text = "".join(recovered_chars)
+    return recovered_text, list(cipher_array), K_16

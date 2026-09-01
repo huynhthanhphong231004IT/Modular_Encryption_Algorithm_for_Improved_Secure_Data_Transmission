@@ -10,63 +10,43 @@ if PROJECT_ROOT not in sys.path:
 from Key_Management.key_manager import load_keys
 
 def compute_parameters(P: int):
-    """
-    Tính cơ số B và số bit k cần thiết cho mỗi khối y.
-    B > max g(x) = 15 + 225P ==> Chọn B = 16 + 225P
-    k = ceil(4 * log2(B))
-    """
     max_g = 15 + 225 * P
     B = max_g + 1
     k = math.ceil(4 * math.log2(B))
     return B, k
 
 def g_func(x: int, P: int) -> int:
-    """Hàm mã hóa thành phần: g(x) = x + P * x^2"""
     return x + P * (x ** 2)
 
 def encode_block(x1: int, x2: int, x3: int, x4: int, P: int, B: int) -> int:
-    """Mã hóa bộ 4 giá trị (x1, x2, x3, x4) thành 1 số nguyên y duy nhất"""
     g1 = g_func(x1, P)
     g2 = g_func(x2, P)
     g3 = g_func(x3, P)
     g4 = g_func(x4, P)
     return g1 + B * g2 + (B ** 2) * g3 + (B ** 3) * g4
-
 def encrypt_matrices_to_binary(matrices: list, P: int = None) -> tuple:
-    """
-    Quy trình mã hóa từ danh sách ma trận A(12)_n (3x3).
-    Tự động nạp tham số P từ load_keys() nếu không truyền vào.
-    """
     if P is None:
         keys = load_keys()
-        # Lấy tham số P (hoặc p) từ hệ thống khóa dùng chung
         P = int(keys.get("P", keys.get("p", 1)))
 
-    N = len(matrices)
-    if N % 2 != 0:
-        matrices.append(np.zeros_like(matrices[0]))
-
-    # 1. Làm phẳng và ghép tuần tự các ma trận
-    flattened_bytes = []
+    hex_nibbles = []
     for mat in matrices:
         flat = mat.flatten()
         for val in flat:
-            flattened_bytes.append(int(val) & 0xFF)
+            # Tách số nguyên 16-bit thành 4 nibbles (4-bit)
+            val = int(val)
+            n1 = (val >> 12) & 0x0F
+            n2 = (val >> 8) & 0x0F
+            n3 = (val >> 4) & 0x0F
+            n4 = val & 0x0F
+            hex_nibbles.extend([n1, n2, n3, n4])
 
-    # 2. Tách mỗi byte thành 2 giá trị hex (h_left, h_right) 4-bit (0-15)
-    hex_nibbles = []
-    for b in flattened_bytes:
-        h_left = (b >> 4) & 0x0F
-        h_right = b & 0x0F
-        hex_nibbles.extend([h_left, h_right])
-
+    # Đảm bảo chia hết cho 4
     while len(hex_nibbles) % 4 != 0:
         hex_nibbles.append(0)
 
-    # 3. Tính thông số B và k
     B, k = compute_parameters(P)
 
-    # 4. Mã hóa từng khối 4 nibbles -> y -> Binary string k-bit
     binary_blocks = []
     y_values = []
     
@@ -82,17 +62,52 @@ def encrypt_matrices_to_binary(matrices: list, P: int = None) -> tuple:
     return final_binary_text, y_values, B, k
 
 if __name__ == "__main__":
-    sample_matrices = [
-        np.array([[0x12, 0x34, 0x56], [0x78, 0x9A, 0xBC], [0xDE, 0xF0, 0x11]], dtype=np.int64),
-        np.array([[0xAA, 0xBB, 0xCC], [0xDD, 0xEE, 0xFF], [0x00, 0x11, 0x22]], dtype=np.int64)
-    ]
-
-    binary_text, y_vals, B, k = encrypt_matrices_to_binary(sample_matrices)
+    CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
     
-    print("=" * 60)
-    print("MÃ HÓA PHI TUYẾN BẬC 2 (E_Nonlinear.py)")
-    print(f"Cơ số B          : {B}")
-    print(f"Số bit/khối (k)  : {k}")
-    print(f"Số khối y tạo ra : {len(y_vals)}")
-    print(f"Chuỗi nhị phân A(13) (50 bit đầu): {binary_text[:50]}...")
-    print("=" * 60)
+    # 1. Khai báo các đường dẫn file
+    input_file = os.path.join(CONTENT_DIR, "E_Phase.npz")
+    output_npz = os.path.join(CONTENT_DIR, "E_Final_Permutation.npz")
+    output_txt = os.path.join(CONTENT_DIR, "E_Final_Permutation.txt")
+
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"Không tìm thấy file đầu vào: {input_file}")
+
+    # 2. Đọc danh sách ma trận và pad_len từ E_Phase.npz
+    phase_data = np.load(input_file)
+    matrices = phase_data["cipher"]
+    pad_len = int(phase_data["pad_len"]) if "pad_len" in phase_data else 0
+
+    print(f"[+] Đã nạp {len(matrices)} khối ma trận từ {input_file}")
+
+    # 3. Thực hiện mã hóa sang chuỗi nhị phân
+    binary_text, y_vals, B, k = encrypt_matrices_to_binary(matrices)
+
+    # 4. Lưu kết quả ra file E_Final_Permutation.npz
+    os.makedirs(CONTENT_DIR, exist_ok=True)
+    np.savez(
+        output_npz,
+        binary_text=binary_text,
+        num_matrices=len(matrices),
+        total_blocks=len(matrices),
+        pad_len=pad_len,
+        B=B,
+        k=k
+    )
+
+    # 5. Lưu kết quả dạng văn bản ra E_Final_Permutation.txt
+    with open(output_txt, "w", encoding="utf-8") as f:
+        f.write(f"Base (B): {B}\n")
+        f.write(f"Bits per block (k): {k}\n")
+        f.write(f"Padding Length: {pad_len}\n")
+        f.write(f"Total Matrices: {len(matrices)}\n")
+        f.write(f"Total Bit Length: {len(binary_text)}\n\n")
+        f.write("--- Encrypted Binary Stream ---\n")
+        f.write(binary_text + "\n\n")
+        f.write("--- Decimal Y Values ---\n")
+        for idx, y in enumerate(y_vals):
+            f.write(f"Block {idx + 1}: {y}\n")
+
+    print(f"\n[+] Mã hóa phi tuyến bậc 2 thành công.")
+    print(f"-> Chuỗi nhị phân đầu ra ({len(binary_text)} bits)")
+    print(f"-> File NPZ lưu tại: {output_npz}")
+    print(f"-> File Text lưu tại: {output_txt}")

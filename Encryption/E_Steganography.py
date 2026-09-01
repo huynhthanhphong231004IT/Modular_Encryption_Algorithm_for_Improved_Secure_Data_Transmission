@@ -46,7 +46,10 @@ def embed_message_from_folder(
     keys = load_keys()
     des_key = keys["des_bytes"]
     msg_bytes = message.encode("utf-8")
-    M_b = bytes_to_bits(msg_bytes)
+    if isinstance(message, str) and all(c in '01' for c in message):
+        M_b = message
+    else:
+        M_b = bytes_to_bits(message.encode("utf-8"))
     LM = len(M_b)
     first_img = Image.open(cover_image_paths[0]).convert("RGBA")
     W, H = first_img.size
@@ -70,46 +73,57 @@ def embed_message_from_folder(
         start_idx = (i - 1) * L_prime
         end_idx = min(i * L_prime, LM)
         M_i = M_b[start_idx:end_idx]
-
         header_N_bits = format(N, "032b")
         header_i_bits = format(i, "032b")
         header_64bits = header_N_bits + header_i_bits
-
         enc_header_64bits = des_encrypt_64bits(header_64bits, des_key)
         payload_bits = enc_header_64bits + M_i
-
         img = Image.open(cover_image_paths[i - 1]).convert("RGBA")
         img_np = np.array(img)
-
         alpha_flat = img_np[:, :, 3].flatten()
         total_pixels = len(alpha_flat)
-
         for idx in range(total_pixels):
             if idx < len(payload_bits):
                 bit = payload_bits[idx]
                 alpha_flat[idx] = 254 if bit == "0" else 255
             else:
                 alpha_flat[idx] = 253
-
         img_np[:, :, 3] = alpha_flat.reshape((H, W))
-
         stego_img = Image.fromarray(img_np, mode="RGBA")
         out_filename = f"stego_image_{i}.png"
         out_path = os.path.join(output_dir, out_filename)
         stego_img.save(out_path, format="PNG")
         saved_stego_paths.append(out_path)
         print(f" -> Đã tạo ảnh Stego {i}/{N}: {out_path}")
-
     return saved_stego_paths
-
 if __name__ == "__main__":
-    input_folder = os.path.join(PROJECT_ROOT, "Content", "Input_Covers")
-    output_folder = os.path.join(PROJECT_ROOT, "Content", "Output_Stego")
-    secret_msg = "Author: Huynh Thanh Phong (Reo Rioll)"
+    CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
+    
+    # 1. Đường dẫn các thư mục và file
+    npz_file = os.path.join(CONTENT_DIR, "E_Final_Permutation.npz")
+    input_folder = os.path.join(CONTENT_DIR, "Input_Covers")
+    output_folder = os.path.join(CONTENT_DIR, "Output_Stego")
+
+    if not os.path.exists(npz_file):
+        raise FileNotFoundError(f"Không tìm thấy file dữ liệu nhị phân: {npz_file}")
+
+    # 2. Đọc chuỗi nhị phân cần giấu từ E_Final_Permutation.npz
+    npz_data = np.load(npz_file)
+    binary_message = str(npz_data["binary_text"])
+    
+    print(f"[+] Đã tải chuỗi nhị phân mã hóa từ: {npz_file}")
+    print(f"-> Độ dài chuỗi bit cần giấu: {len(binary_message)} bits")
+
+    # 3. Thực hiện giấu tin vào danh sách ảnh trong thư mục Input_Covers
     try:
-        stego_paths = embed_message_from_folder(secret_msg, input_folder, output_folder)
-        print("\n[THÀNH CÔNG] Đã giấu tin xong! Các ảnh Stego được lưu tại:")
+        stego_paths = embed_message_from_folder(
+            message=binary_message,
+            input_dir=input_folder,
+            output_dir=output_folder
+        )
+        print("\n[THÀNH CÔNG] Đã giấu tin thành công! Các ảnh Stego lưu tại:")
         for path in stego_paths:
             print(f" - {path}")
+            
     except Exception as e:
         print(f"\n[LỖI] {e}")
