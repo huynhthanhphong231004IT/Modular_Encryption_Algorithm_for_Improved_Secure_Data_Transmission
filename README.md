@@ -193,28 +193,29 @@ a_{20} & a_{21} & a_{22}
   </span>
 </h3>
 
+### Quy trình xử lý các Pha mã hóa
+
 **Pha I: Lặp 16 lần thực hiện với trường khóa S từ 4 đến 35**
 
-*Lặp tuần tự: $i = 1$ đến $16$ thực hiện các bước sau:*
+Lặp tuần tự i = 1 đến $16$ thực hiện các bước sau:
 
-- **I.1 - Vòng 1: với các trường khóa S chẵn** ($i = 2i + 2$)
-  - Phép XOR với khóa: $A^{(3)} = A^{(2)} \oplus K_i$.
-  - Phép nén lần 1 qua hộp M-Box: $A^{(4)} = \text{M-Box}(A^{(3)}, K_i)$.
-  - Bảng logarit (Log Table): $A^{(5)} = \log(A^{(4)})$.
-
-- **I.2 - Vòng 2: với các trường khóa S lẻ** ($i = 2i + 3$)
-  - Phép XOR với khóa mới (khóa lẻ): $A^{(6)} = A^{(5)} \oplus K_i$.
-  - Phép nén lần 2 qua hộp M-Box: $A^{(7)} = \text{M-Box}(A^{(6)}, K_i)$.
-  - Bảng mũ (Exponential Table): $A^{(8)} = \exp(A^{(7)})$.
+| Vòng | Bước | Tên phép toán | Mô tả |
+| :---: | :---: | :--- | :--- |
+| **I.1 - Vòng 1**<br>*(Khóa S chẵn: i = 2i + 2)* | 1 | Phép XOR với khóa | $A^{(3)} = A^{(2)} \oplus K_i$ |
+| | 2 | Phép nén lần 1 qua hộp M-Box | $A^{(4)} = \text{M-Box}(A^{(3)}, K_i)$ |
+| | 3 | Bảng logarit (Log Table) | $A^{(5)} = \log(A^{(4)})$ |
+| **I.2 - Vòng 2**<br>*(Khóa S lẻ: i = 2i + 3)* | 1 | Phép XOR với khóa mới | $A^{(6)} = A^{(5)} \oplus K_i$ |
+| | 2 | Phép nén lần 2 qua hộp M-Box | $A^{(7)} = \text{M-Box}(A^{(6)}, K_i)$ |
+| | 3 | Bảng mũ (Exponential Table) | $A^{(8)} = \exp(A^{(7)})$ |
 
 <br>
 
 **Pha II: Lặp 3 lần thực hiện với trường khóa S từ 1 đến 3**
+Lặp tuần tự j = 1 đến 3 thực hiện các bước sau:
 
-*Lặp tuần tự: $j = 1$ đến $3$ thực hiện các bước sau:*
-
-- Phép XOR với khóa tam thức: $A^{(9)} = A^{(8)} \oplus K_j$.
-- Hoán vị hàng (Row Interchange): $R_m \leftarrow R_{(m+1) \bmod 3}, \quad 0 \le m \le 2$. Tức là hàng thứ $m$ được thay thế bằng hàng kế tiếp (theo chu kỳ $\bmod 3$).
-- Phép thay thế byte (Sub-Bytes): $A^{(11)} = \text{S-Box}(A^{(10)})$.
-
-- **Chuyển đổi sang giá trị thập lục phân:** $A^{(12)} = \text{Hexadecimal}(A^{(11)})$.
+| STT | Tên phép toán | Mô tả |
+| :---: | :--- | :--- |
+| 1 | Phép XOR với khóa tam thức | $A^{(9)} = A^{(8)} \oplus K_j$ |
+| 2 | Hoán vị hàng (Row Interchange) | $R_m \leftarrow R_{(m+1) \bmod 3}, \quad 0 \le m \le 2$<br>*(Hàng m được thay thế bằng hàng kế tiếp theo chu kỳ $\bmod 3$)* |
+| 3 | Phép thay thế byte (Sub-Bytes) | $A^{(11)} = \text{S-Box}(A^{(10)})$ |
+| **KẾT QUẢ** | Chuyển đổi sang giá trị thập lục phân | $A^{(12)} = \text{Hexadecimal}(A^{(11)})$ |
