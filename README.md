@@ -292,3 +292,40 @@ A'(x_i, y_i) &= 255, && \text{if embedding bit } b_i = 1
 \end{aligned}$$
 
 Sau khi nhúng, mô hình biểu diễn của ảnh đã mã hóa trở thành $I'_{\text{encoded}}(x, y) = [R(x, y), G(x, y), B(x, y), A'(x, y)]$. Dung lượng giấu tin cực đại $C$ tính bằng bit trên một thực thể ảnh tuần theo giới hạn hình học $C = H \times W \quad (\text{bits})$.
+
+
+## Kết quả thảo luận
+
+<p align="center">
+  <img src="Images/Time.jpg" width="800">
+  <br>
+  <i> Biểu đồ so sánh các thời gian các bước giữa MEA và MEA-GQA</i>
+</p>
+
+Bảng đánh giá chất lượng mã hóa văn bản
+| Chỉ số | Giá trị | Nhận xét |
+| :--- | :--- | :--- |
+| Entropy (bits) | 5.937045 | Ciphertext có tính ngẫu nhiên cao. |
+| Growth rate | 1.792969 | Kích thước tăng khoảng 79% sau mã hóa. |
+| Index of Coincidence | 0.016388 | Gần phân bố ngẫu nhiên, kháng phân tích tần suất. |
+| Redundancy | 0.010492 | Dư thừa thông tin thấp, giảm cấu trúc dữ liệu. |
+| Compression ratio | 0.769608 | Khả năng nén thấp, ít mẫu thống kê. |
+| Hamming distance | 1010 | Khả năng khuếch tán bit tốt. |
+| Bit diffusion (%) | 40.01 | Hiệu ứng avalanche tốt, gần mức lý tưởng. |
+
+<p align="center">
+  <img src="Images/histogramMEAtc.png" width="800">
+  <br>
+  <i> So sánh histogram màu ảnh trước và sau khi giấu tin</i>
+</p>
+
+Bảng đánh giá chất lượng ảnh giữa ảnh gốc và ảnh sau khi giấu tin
+
+| Chỉ số | Giá trị |
+| :--- | :--- |
+| MSE | 1.743 |
+| PSNR (dB) | 45.57 |
+| SSIM | 0.998 |
+| Entropy (bits) | 7.666 |
+| Correlation | H = 0.892<br>V = 0.850<br>D = 0.792 |
+
