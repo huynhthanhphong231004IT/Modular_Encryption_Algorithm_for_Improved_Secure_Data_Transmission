@@ -100,8 +100,41 @@ MEA_GQA.Decoding_MEAGQA(output_stego_folder)
 
 <h2 align="center">
   <span style="color:#8B4513;">
-    <b>Mô hình mã hóa mô - đun dữ liệu trên đường truyền cải tiến (MEA-GQA)</b>
+    <b>Mô hình mã hóa mô - đun trên dữ liệu đường truyền cải tiến (MEA-GQA)</b>
   </span>
 </h2>
+
+<p align="center">
+  <img src="Images/MEA_TC.png" width="800">
+  <br>
+  <i>Kiến trúc mô hình mã hóa mô - đun trên dữ liệu đường truyền cải tiến (MEA-GQA) </i>
+</p>
+
+<p align="center">
+  <img src="Images/MEA_TC.png" width="800">
+  <br>
+  <i>Kiến trúc mô hình mã hóa mô-đun trên dữ liệu đường truyền cải tiến (MEA-GQA)</i>
+</p>
+
+## Đóng góp chính của đề tài
+
+Nghiên cứu này kế thừa cấu trúc nền tảng của thuật toán MEA (Modular Encryption Algorithm) của IJSRNSC - Author: P.Sri Ram Chandra, G. Venkateswara Rao, G.V. Swamy và đề xuất các cải tiến nhằm nâng cao độ an toàn mật mã (bằng việc mở rộng trường khóa) cũng như tối ưu hóa khả năng ứng dụng trong lĩnh vực giấu tin ảnh số. Các đóng góp chính bao gồm:
+
+1. Cải tiến cơ chế hoán vị ban đầu trên trường hữu hạn:
+   * Thay thế cơ chế hoán vị cố định của MEA gốc bằng phép biến đổi tuyến tính trên trường hữu hạn, kết hợp ma trận khả nghịch và phần tử sinh.
+   * Hiệu quả: Mở rộng đáng kể không gian khóa, tăng tính ngẫu nhiên của quá trình hoán vị và nâng cao khả năng chống phân tích tuyến tính nhờ duy trì tính đơn ánh của phép ánh xạ.
+
+2. Trộn dữ liệu qua các phép XOR cùng giải thuật M-Box:
+   * Hòa trộn và che giấu cấu trúc dữ liệu thông qua phép XOR với ma trận khóa, kết hợp các phép ánh xạ Logarithm, Exponentials và Substitution Box.
+   * Hàm M-Box: Xây dựng cơ chế ánh xạ phi tuyến biến 4 giá trị hexadecimal thành 2 giá trị hexadecimal, không tồn tại phép nghịch đảo, dựa trên các phép toán trên trường Galois ($GF$).
+
+3. Tầng hoán vị phi tuyến bậc hai sau mã hóa:
+   * Áp dụng phép biến đổi phi tuyến ngay sau khi tạo bản mã bằng MEA để tăng cường tính hỗn loạn (confusion) và khả năng khuếch tán (diffusion).
+   * Hiệu quả: Phá vỡ các quan hệ tuyến tính còn tồn tại trong bản mã, làm gia tăng độ phức tạp của cấu trúc mã hóa và nâng cao khả năng chống lại các phương pháp phân tích mật mã (cryptanalysis).
+
+4. Tích hợp cơ chế giấu tin ảnh RGBA sử dụng LSB kết hợp DES:
+   * Mô hình bảo vệ đa lớp: Phân mảnh bản mã và nhúng trực tiếp vào kênh Alpha của ảnh RGBA.
+   * Quản lý dữ liệu: Thông tin tiêu đề (header) của mỗi ảnh được mã hóa bằng thuật toán DES để quản lý chính xác số lượng và thứ tự các phân đoạn.
+   * Cơ chế nhúng: Nhúng dữ liệu theo quy tắc mã hóa 3 mức trên giá trị Alpha, giúp bảo đảm khôi phục dữ liệu chính xác $100\%$, duy trì chất lượng thị giác của ảnh mang tin (cover image) và tăng cường độ an toàn trong lưu trữ cũng như truyền tải.
 
 
