@@ -17,7 +17,7 @@
 <mark><b><b>Update Research:</b></b> </mark> Modular Encryption Algorithm for Improved Secure Data Transmission<br>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<b>Timeline:</b> 03/2025 – 08/2026 at Computer science department
+<b>Timeline:</b> 02/2026 – 08/2026 at Computer science department
 </p>
 <p align="center">
    <b>Presional link Information</b>
