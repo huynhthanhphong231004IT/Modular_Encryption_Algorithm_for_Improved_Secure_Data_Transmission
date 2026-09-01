@@ -5,7 +5,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
-from Decoding.Decoding_MEAGQA import Decoding_MEAGQA
+from MEA_GQA.MEA_GQA import MEA_GQA
 
 if __name__ == "__main__":
     CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
@@ -14,6 +14,6 @@ if __name__ == "__main__":
 
     # --- Phần III: Giải mã MEA-GQA ---
     try:
-        Decoding_MEAGQA(output_stego_folder)
+        MEA_GQA.Decoding_MEAGQA(output_stego_folder)
     except Exception as e:
         print(f"\n[LỖI THỰC THI PIPELINE] - Phần giải mã MEA-GQA: {e}")

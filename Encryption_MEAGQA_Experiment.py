@@ -5,7 +5,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
-from Encryption.Encryption_MEAGQA import Encryption_MEAGQA
+from MEA_GQA.MEA_GQA import MEA_GQA
 
 if __name__ == "__main__":
     CONTENT_DIR = os.path.join(PROJECT_ROOT, "Content")
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     # --- Phần II: Mã hóa MEA-GQA ---
     try:
-        stego_result_dir = Encryption_MEAGQA(
+        stego_result_dir = MEA_GQA.Encryption_MEAGQA(
             input_txt_path=input_text_file,
             input_covers_dir=input_covers_folder,
             output_stego_dir=output_stego_folder
