@@ -144,9 +144,13 @@ Nghiên cứu này kế thừa cấu trúc nền tảng của thuật toán MEA 
   </span>
 </h3>
 
-<p align="center">
-  <img src="Images/SinhKhoa.jpg" width="600">
-</p>
+
+| Tham số | Mô tả | Vai trò |
+| :--- | :--- | :--- |
+| $[n_1, n_2, \dots, n_{35}]$ | 35 giá trị nguyên $n_i$ được sử dụng để sinh tương ứng 35 ma trận tam thức $[S_1, S_2, \dots, S_{35}]$ theo công thức tổng quát. | Xác định tập ma trận tam thức phục vụ các phép biến đổi mật mã, đồng thời cho phép tái tạo ma trận từ tham số $n_i$ thay vì phải lưu trữ trực tiếp các ma trận. |
+| $S_{36}, p, g$ | $p$ và $g$ là các tham số nguyên tố của hệ mật; $S_{36}$ là ma trận được sinh từ nhóm tuyến tính tổng quát $GL(3, \mathbb{F}_p)$. | Xác lập không gian tham số và cấu trúc đại số cho các phép biến đổi, góp phần bảo đảm tính khả nghịch của hệ mật. |
+| $P, B$ | $P$ là số nguyên dương và $B$ là tham số thỏa mãn điều kiện $B > 15 + 225P$. | Xác định miền tham số và các điều kiện ràng buộc cần thiết cho quá trình biến đổi và xử lý bản mã. |
+| $D = 64\text{ bit}$ | Độ dài khóa được sử dụng trong thành phần mật mã DES, với kích thước 64 bit. | Xác định kích thước khóa và không gian khóa tương ứng của hệ thống. |
 
 
 
