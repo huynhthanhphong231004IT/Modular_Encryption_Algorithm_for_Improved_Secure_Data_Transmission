@@ -292,6 +292,10 @@ Bước 3: Sử dụng mật mã DES mã hóa 64 bits chỉ mục: Để tăng c
 
 Bước 4: Nguyên lý nhúng dữ liệu thông điệp: Thuật toán áp dụng kỹ thuật thay thế bit ít quan trọng nhất (Least Significant Bit - LSB) nhưng được tùy biến để chỉ tác động lên kênh Alpha ($A$). Nhằm đảm bảo tính vô hình về mặt thị giác đối với mắt người, giá trị của kênh Alpha được duy trì tiệm cận mức bão hòa 255 theo quy tắc hàm phân tách sau:
 
-$$A'(x_i, y_i) = \begin{cases} 253, & \text{if the pixel does not contain data} \\ 254, & \text{if embedding bit } b_i = 0 \\ 255, & \text{if embedding bit } b_i = 1 \end{cases}$$
+$$\begin{aligned}
+A'(x_i, y_i) &= 253, && \text{if the pixel does not contain data} \\
+A'(x_i, y_i) &= 254, && \text{if embedding bit } b_i = 0 \\
+A'(x_i, y_i) &= 255, && \text{if embedding bit } b_i = 1
+\end{aligned}$$
 
 Sau khi nhúng, mô hình biểu diễn của ảnh đã mã hóa trở thành $I'_{\text{encoded}}(x, y) = [R(x, y), G(x, y), B(x, y), A'(x, y)]$. Dung lượng giấu tin cực đại $C$ tính bằng bit trên một thực thể ảnh tuần theo giới hạn hình học $C = H \times W \quad (\text{bits})$.
