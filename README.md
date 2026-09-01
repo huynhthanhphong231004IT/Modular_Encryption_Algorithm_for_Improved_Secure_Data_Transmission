@@ -222,7 +222,7 @@ Lặp tuần tự j = 1 đến 3 thực hiện các bước sau:
 
 **Chuyển đổi sang giá trị thập lục phân:** $A^{(12)} = \text{Hexadecimal}(A^{(11)})$.
 
-<mark>#### Giải thuật sinh bảng tra M-Box<\mark>
+### <mark>Giải thuật sinh bảng tra M-Box<\mark>
 
 Thông qua các phép nén phi tuyến trên trường hữu hạn, M-Box triệt tiêu hoàn toàn hàm ngược toán học trực tiếp. Điều này khiến việc khôi phục lại dữ liệu gốc từ đầu ra là không thể thực hiện về mặt tính toán, vô hiệu hóa hoàn toàn các đòn tấn công giải mã ngược ngay cả khi kẻ tấn công sở hữu siêu máy tính.
 
