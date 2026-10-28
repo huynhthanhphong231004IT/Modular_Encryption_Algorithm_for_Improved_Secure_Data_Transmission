@@ -6,6 +6,25 @@
    Computer Science of College of Information and Communication Technology of Can Tho University (Course 48)<br>
 </p>
 
+<p align="center">
+  Đồ án môn học An toàn và bảo mật thông tin HKI 2025 - 2026
+  <br>
+  Một phần khóa luận tốt nghiệp ngành khoa học máy tính HKIII 2025 - 2026
+  <br>
+  Giáo viên hướng dẫn: ThS. Phan Bích Chung & TS. Mã Trường Thành
+</p>
+
+</p>
+
+<h2 align="center">
+  
+[![Facebook](https://img.shields.io/badge/Facebook-Huỳnh%20Thanh%20Phong-E53935?style=for-the-badge&logo=facebook&logoColor=white&labelColor=333333)](https://www.facebook.com/huynh.thanh.phong.561667)
+[![TikTok](https://img.shields.io/badge/TikTok-@reorioll-E53935?style=for-the-badge&logo=tiktok&logoColor=white&labelColor=333333)](https://www.tiktok.com/@reorioll)
+[![YouTube](https://img.shields.io/badge/YouTube-ReoRioll-E53935?style=for-the-badge&logo=youtube&logoColor=white&labelColor=333333)](https://www.youtube.com/@ReoRioll-2304CICTCTU)
+
+</h2>
+
+
 <p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <b>Researchs:</b> Artificial Intelligence in Education - Mathematics in Deep Learning and Machine Learning<br>
@@ -19,20 +38,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <b>Timeline:</b> 02/2026 – 08/2026 at Computer science department
 </p>
-<p align="center">
-   <b>Presional link Information</b>
-</p>
 
-<p>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-Facbook: https://www.facebook.com/huynh.thanh.phong.561667 <br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-Kaggle: https://www.kaggle.com/reorioll <br>
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-Youtobe: https://www.youtube.com/@ReoRioll-2304CICTCTU <br>
-</p>
 <br>
 
 <h3 align="left">
