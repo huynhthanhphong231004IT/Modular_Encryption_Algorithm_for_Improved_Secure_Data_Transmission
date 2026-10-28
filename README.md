@@ -97,6 +97,23 @@ MEA_GQA.Decoding_MEAGQA(output_stego_folder)
 >
 > **`output_stego_folder`**: The path to the folder containing the destination image files with hidden information.
 
+<p>
+  Code in python
+</p>
+
+```python
+git clone https://github.com/huynhthanhphong231004IT/Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission.git
+
+cd Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission
+python Secret_Key_Generation_Experiment.py
+python Encryption_MEAGQA_Experiment.py
+python Decoding_MEAGQA_Experiment.py
+```
+File nội dung cần mã hóa: Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission\Content\sample_doc.txt
+Kết quả sinh ra file key: Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission\Content\all_keys.npz
+Thư mục ảnh Stego đầu vào: Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission\Content\Input_Covers\
+Thư mục ảnh Stego đầu ra: Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission\Content\Output_Stego\
+File nội dung đã được giải mã: Modular_Encryption_Algorithm_for_Improved_Secure_Data_Transmission\Content\RESULT_Sample_doc_Encrypted.txt
 
 <h3 align="left">
   <span style="color:#8B4513;">
